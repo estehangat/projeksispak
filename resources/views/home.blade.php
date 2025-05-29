@@ -62,11 +62,8 @@
                     <div class="modal-body custom-modal-body">
                         <div class="row g-3">
                             <div class="col-md-12 mb-2">
-                                <select class="form-select custom-input" id="name" name="name" required>
-                                    <option value="" disabled selected>Pilih Role</option>
-                                    <option value="admin">Admin</option>
-                                    <option value="pakar">Pakar</option>
-                                </select>
+                                <input type="text" class="form-control custom-input" id="name"
+                                    name="name" placeholder="Nama Admin" required>
                             </div>
                             <div class="col-md-12 mb-2">
                                 <input type="email" class="form-control custom-input" id="email" name="email"

@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Gejala;
 use App\Models\User;
+use App\Models\Gejala;
+use App\Models\Penyakit;
 use Illuminate\Http\Request;
 
 class AdminDashboardController extends Controller
@@ -12,14 +13,16 @@ class AdminDashboardController extends Controller
     {
         $gejalas = Gejala::all();
         $gejalaCount = $gejalas->count();
-        return view('admin.dashboard', compact('gejalas', 'gejalaCount'));
+        $penyakits = Penyakit::all();
+        $penyakitCount = $penyakits->count();
+        return view('admin.dashboard', compact('gejalas', 'gejalaCount', 'penyakits', 'penyakitCount'));
     }
 
     public function admin()
     {
-        $admin = User::all();
-        $adminCount = $admin->count();
-        return view('admin.admin.index', compact('admin', 'adminCount'));
+        $admins = User::all();
+        $adminCount = $admins->count();
+        return view('admin.admin.index', compact('admins', 'adminCount'));
     }
 
     public function create()
@@ -35,11 +38,7 @@ class AdminDashboardController extends Controller
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-        ]);
+        User::create($request->all());
 
         return redirect()->route('admin.admin')->with('success', 'Admin created successfully.');
     }
@@ -59,14 +58,7 @@ class AdminDashboardController extends Controller
         ]);
 
         $admin = User::findOrFail($id);
-        $admin->name = $request->name;
-        $admin->email = $request->email;
-
-        if ($request->filled('password')) {
-            $admin->password = bcrypt($request->password);
-        }
-
-        $admin->save();
+        $admin->update($request->all());
 
         return redirect()->route('admin.admin')->with('success', 'Admin updated successfully.');
     }

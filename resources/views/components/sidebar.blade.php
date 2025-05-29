@@ -3,8 +3,8 @@
 
     <div class="sidebar-section">Pengetahuan</div>
     <a href="#" class="sidebar-item">Diagnosa</a>
-    <a href="#" class="sidebar-item">Gejala</a>
-    <a href="#" class="sidebar-item">Penyakit</a>
+    <a href="{{ route('admin.gejala') }}" class="sidebar-item">Gejala</a>
+    <a href="{{ route('admin.penyakit') }}" class="sidebar-item">Penyakit</a>
     <a href="#" class="sidebar-item">Hasil</a>
 
     <div class="sidebar-section">Pengaturan</div>

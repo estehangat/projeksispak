@@ -1,43 +1,43 @@
 @extends('layouts.admin')
 
-@section('title', 'Dashboard Admin')
+@section('title', 'Data Gejala')
 
-@section('page-title', 'Dashboard')
+@section('page-title', 'Gejala')
 
 @section('content')
     <div class="main-content">
         <div class="container background-white p-5 rounded-4 shadow-sm">
-            <h1 class="mb-4 fw-bold">Daftar Admin</h1>
+            <h1 class="mb-4 fw-bold">Daftar Gejala</h1>
 
             <!-- Table -->
             <a href="#" class="btn btn-outline-success mb-3 rounded-pill" data-bs-toggle="modal"
-                data-bs-target="#addAdminModal">
-                <i class="bi bi-plus-circle"></i> Tambah Admin
+                data-bs-target="#addGejalaModal">
+                <i class="bi bi-plus-circle"></i> Tambah Gejala
             </a>
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <thead>
                         <tr class="table-header">
                             <th style="width: 50px;">#</th>
-                            <th style="width: 100px;">ROLE</th>
-                            <th style="width: 100px;">EMAIL</th>
+                            <th style="width: 100px;">KODE GEJALA</th>
+                            <th style="width: 300px;">GEJALA</th>
                             <th style="width: 100px">AKSI</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($admins as $admin)
+                        @foreach ($gejalas as $gejala)
                             <tr>
                                 <td class="text-left">{{ $loop->iteration }}</td>
-                                <td class="text-left">{{ $admin->name }}</td>
-                                <td class="text-left">{{ $admin->email }}</td>
+                                <td class="text-left">{{ $gejala->kode_gejala }}</td>
+                                <td class="text-left">{{ $gejala->gejala }}</td>
                                 <td class="text-left">
                                     <div class="d-flex gap-2">
                                         <button class="btn btn-sm btn-warning" title="Edit" data-bs-toggle="modal"
-                                            data-bs-target="#editAdminModal{{ $admin->id }}">
+                                            data-bs-target="#editGejalaModal{{ $gejala->id }}">
                                             <i class="bi bi-pencil-square"></i>
                                         </button>
                                         <button class="btn btn-sm btn-danger" title="Hapus" data-bs-toggle="modal"
-                                            data-bs-target="#deleteAdminModal{{ $admin->id }}">
+                                            data-bs-target="#deleteGejalaModal{{ $gejala->id }}">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
@@ -50,35 +50,24 @@
         </div>
     </div>
 
-    <!-- Add Admin Modal -->
-    <div class="modal fade" id="addAdminModal" tabindex="-1" aria-labelledby="addAdminModalLabel" aria-hidden="true">
+    <!-- Add Gejala Modal -->
+    <div class="modal fade" id="addGejalaModal" tabindex="-1" aria-labelledby="addGejalaModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content custom-modal">
                 <div class="modal-header custom-modal-header">
-                    <h5 class="modal-title fw-bold" id="addAdminModalLabel">Tambah Admin</h5>
+                    <h5 class="modal-title fw-bold" id="addGejalaModalLabel">Tambah Gejala</h5>
                 </div>
-                <form action="{{ route('admin.admin.store') }}" method="POST">
+                <form action="{{ route('admin.gejala.store') }}" method="POST">
                     @csrf
                     <div class="modal-body custom-modal-body">
                         <div class="row g-3">
-                            <div class="col-md-12 mb-2">
-                                <select class="form-select custom-input" id="name" name="name" required>
-                                    <option value="" disabled selected>Pilih Role</option>
-                                    <option value="admin">Admin</option>
-                                    <option value="pakar">Pakar</option>
-                                </select>
+                            <div class="col-md-6">
+                                <input type="text" class="form-control custom-input" id="kode_gejala"
+                                    name="kode_gejala" placeholder="Kode Gejala" required>
                             </div>
-                            <div class="col-md-12 mb-2">
-                                <input type="email" class="form-control custom-input" id="email" name="email"
-                                    placeholder="Email Admin" required>
-                            </div>
-                            <div class="col-md-12 mb-2">
-                                <input type="password" class="form-control custom-input" id="password" name="password"
-                                    placeholder="Password" required>
-                            </div>
-                            <div class="col-md-12">
-                                <input type="password" class="form-control custom-input" id="password_confirmation" name="password_confirmation"
-                                    placeholder="Konfirmasi Password" required>
+                            <div class="col-md-6">
+                                <input type="text" class="form-control custom-input" id="gejala" name="gejala"
+                                    placeholder="Gejala" required>
                             </div>
                         </div>
                     </div>
@@ -92,40 +81,30 @@
         </div>
     </div>
 
-    <!-- Edit & Delete Modals for each Admin -->
-    @foreach ($admins as $admin)
-        <!-- Edit Admin Modal -->
-        <div class="modal fade" id="editAdminModal{{ $admin->id }}" tabindex="-1"
-            aria-labelledby="editAdminModalLabel{{ $admin->id }}" aria-hidden="true">
+    <!-- Edit & Delete Modals for each Gejala -->
+    @foreach ($gejalas as $gejala)
+        <!-- Edit Gejala Modal -->
+        <div class="modal fade" id="editGejalaModal{{ $gejala->id }}" tabindex="-1"
+            aria-labelledby="editGejalaModalLabel{{ $gejala->id }}" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content custom-modal">
                     <div class="modal-header custom-modal-header">
-                        <h5 class="modal-title fw-bold" id="editAdminModalLabel{{ $admin->id }}">Edit Admin</h5>
+                        <h5 class="modal-title fw-bold" id="editGejalaModalLabel{{ $gejala->id }}">Edit Gejala</h5>
                     </div>
-                    <form action="{{ route('admin.admin.update', $admin->id) }}" method="POST">
+                    <form action="{{ route('admin.gejala.update', $gejala->id) }}" method="POST">
                         @csrf
                         @method('PUT')
                         <div class="modal-body custom-modal-body">
                             <div class="row g-3">
-                                <div class="col-md-12 mb-2">
+                                <div class="col-md-6">
                                     <input type="text" class="form-control custom-input"
-                                        id="edit_name{{ $admin->id }}" name="name"
-                                        value="{{ $admin->name }}" placeholder="Nama Admin" required>
+                                        id="edit_kode_gejala{{ $gejala->id }}" name="kode_gejala"
+                                        value="{{ $gejala->kode_gejala }}" placeholder="Kode Gejala" required>
                                 </div>
-                                <div class="col-md-12 mb-2">
-                                    <input type="email" class="form-control custom-input"
-                                        id="edit_email{{ $admin->id }}" name="email"
-                                        value="{{ $admin->email }}" placeholder="Email" required>
-                                </div>
-                                <div class="col-md-12 mb-2">
-                                    <input type="password" class="form-control custom-input"
-                                        id="edit_password{{ $admin->id }}" name="password"
-                                        placeholder="Password (kosongkan jika tidak diubah)">
-                                </div>
-                                <div class="col-md-12">
-                                    <input type="password" class="form-control custom-input"
-                                        id="edit_password_confirmation{{ $admin->id }}" name="password_confirmation"
-                                        placeholder="Konfirmasi Password">
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control custom-input"
+                                        id="edit_gejala{{ $gejala->id }}" name="gejala"
+                                        value="{{ $gejala->gejala }}" placeholder="Gejala" required>
                                 </div>
                             </div>
                         </div>
@@ -139,21 +118,21 @@
             </div>
         </div>
 
-        <!-- Delete Admin Modal -->
-        <div class="modal fade" id="deleteAdminModal{{ $admin->id }}" tabindex="-1"
-            aria-labelledby="deleteAdminModalLabel{{ $admin->id }}" aria-hidden="true">
+        <!-- Delete Gejala Modal -->
+        <div class="modal fade" id="deleteGejalaModal{{ $gejala->id }}" tabindex="-1"
+            aria-labelledby="deleteGejalaModalLabel{{ $gejala->id }}" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content custom-modal">
                     <div class="modal-header custom-modal-header">
-                        <h5 class="modal-title fw-bold" id="deleteAdminModalLabel{{ $admin->id }}">Konfirmasi Hapus
+                        <h5 class="modal-title fw-bold" id="deleteGejalaModalLabel{{ $gejala->id }}">Konfirmasi Hapus
                         </h5>
                     </div>
                     <div class="modal-body custom-modal-body">
-                        <p>Apakah Anda yakin ingin menghapus admin <strong>{{ $admin->name }}</strong> dengan
-                            email <strong>{{ $admin->email }}</strong>?</p>
+                        <p>Apakah Anda yakin ingin menghapus gejala <strong>{{ $gejala->gejala }}</strong> dengan
+                            kode <strong>{{ $gejala->kode_gejala }}</strong>?</p>
                     </div>
                     <div class="modal-footer custom-modal-footer">
-                        <form action="{{ route('admin.admin.destroy', $admin->id) }}" method="POST"
+                        <form action="{{ route('admin.gejala.destroy', $gejala->id) }}" method="POST"
                             style="display: inline;">
                             @csrf
                             @method('DELETE')
@@ -224,6 +203,11 @@
             background-color: #fff;
         }
 
+        .selected-input {
+            border-color: #007bff !important;
+            background-color: #fff !important;
+        }
+
         .custom-modal-footer {
             background-color: #f8f9fa;
             border-top: 1px solid #e9ecef;
@@ -262,6 +246,11 @@
             background-color: #545b62;
             border-color: #545b62;
             color: white;
+        }
+
+        /* Modal backdrop */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.6);
         }
     </style>
 @endpush

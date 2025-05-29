@@ -31,7 +31,7 @@
                                 <i class="fa fa-virus text-danger fa-2x"></i>
                             </div>
                             <div>
-                                <h5 class="card-title mb-0">a</h5>
+                                <h5 class="card-title mb-0">{{ $penyakitCount }}</h5>
                                 <p class="card-text">Penyakit</p>
                             </div>
                         </div>
@@ -46,7 +46,7 @@
                     <thead>
                         <tr class="table-header">
                             <th style="width: 50px;">#</th>
-                            <th style="width: 100px;">KODE</th>
+                            <th style="width: 150px;">KODE GEJALA</th>
                             <th>GEJALA</th>
                         </tr>
                     </thead>
@@ -56,6 +56,29 @@
                                 <td class="text-left">{{ $loop->iteration }}</td>
                                 <td class="text-left">{{ $gejala->kode_gejala }}</td>
                                 <td class="text-left">{{ $gejala->gejala }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Table -->
+            <h5 class="mb-3 mt-5 fs-3">Daftar Penyakit</h5>
+            <div class="table-responsive">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr class="table-header">
+                            <th style="width: 50px;">#</th>
+                            <th style="width: 150px;">KODE PENYAKIT</th>
+                            <th>PENYAKIT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($penyakits as $penyakit)
+                            <tr>
+                                <td class="text-left">{{ $loop->iteration }}</td>
+                                <td class="text-left">{{ $penyakit->kode_penyakit }}</td>
+                                <td class="text-left">{{ $penyakit->penyakit }}</td>
                             </tr>
                         @endforeach
                     </tbody>
