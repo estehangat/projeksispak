@@ -1,13 +1,13 @@
 @extends('layouts.admin')
 
-@section('title', 'Data Feedback')
+@section('title', 'Data Hasil Diagnosa')
 
-@section('page-title', 'Feedback')
+@section('page-title', 'Hasil Diagnosa')
 
 @section('content')
     <div class="main-content">
         <div class="container background-white p-5 rounded-4 shadow-sm">
-            <h1 class="mb-4 fw-bold">Daftar Feedback</h1>
+            <h1 class="mb-4 fw-bold">Daftar Hasil Diagnosa</h1>
 
             <!-- Table -->
             <div class="table-responsive">
@@ -15,39 +15,31 @@
                     <thead>
                         <tr class="table-header">
                             <th style="width: 50px;">#</th>
-                            <th style="width: 175px;">NAMA</th>
-                            <th style="width: 150px;">EMAIL</th>
-                            <th style="width: 100px;">RATING</th>
-                            <th>KOMENTAR</th>
-                            <th style="width: 75px;">TANGGAL</th>
+                            <th style="width: 150px;">PASIEN</th>
+                            <th style="width: 200px;">DIAGNOSA PENYAKIT</th>
+                            <th style="width: 150px;">KODE PENYAKIT</th>
+                            <th>DESKRIPSI</th>
+                            <th style="width: 125px;">TANGGAL</th>
                             <th style="width: 80px">AKSI</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($feedbacks as $feedback)
+                        @foreach ($hasilDiagnosa as $hasil)
                             <tr>
                                 <td class="text-left">{{ $loop->iteration }}</td>
-                                <td class="text-left">{{ $feedback->nama }}</td>
-                                <td class="text-left">{{ $feedback->email }}</td>
-                                <td class="text-center">
-                                    @for ($i = 1; $i <= 5; $i++)
-                                        @if ($i <= $feedback->rating)
-                                            <i class="bi bi-star-fill text-warning"></i>
-                                        @else
-                                            <i class="bi bi-star text-warning"></i>
-                                        @endif
-                                    @endfor
-                                </td>
-                                <td class="text-left">{{ $feedback->komentar }}</td>
-                                <td class="text-left">{{ $feedback->created_at->format('d/m/Y') }}</td>
+                                <td class="text-left">{{ $hasil->user ? $hasil->user->name : 'Pasien Anonim' }}</td>
+                                <td class="text-left">{{ $hasil->penyakit->penyakit }}</td>
+                                <td class="text-left">{{ $hasil->penyakit->kode_penyakit }}</td>
+                                <td class="text-left">{{ Str::limit($hasil->penyakit->deskripsi, 100) }}</td>
+                                <td class="text-left">{{ $hasil->created_at->format('d/m/Y') }}</td>
                                 <td class="text-left">
                                     <div class="d-flex gap-2">
                                         <button class="btn btn-sm btn-info" title="Detail" data-bs-toggle="modal"
-                                            data-bs-target="#detailFeedbackModal{{ $feedback->id }}">
+                                            data-bs-target="#detailHasilModal{{ $hasil->id }}">
                                             <i class="bi bi-eye"></i>
                                         </button>
                                         <button class="btn btn-sm btn-danger" title="Hapus" data-bs-toggle="modal"
-                                            data-bs-target="#deleteFeedbackModal{{ $feedback->id }}">
+                                            data-bs-target="#deleteHasilModal{{ $hasil->id }}">
                                             <i class="bi bi-trash"></i>
                                         </button>
                                     </div>
@@ -60,45 +52,47 @@
         </div>
     </div>
 
-    <!-- Detail & Delete Modals for each Feedback -->
-    @foreach ($feedbacks as $feedback)
-        <!-- Detail Feedback Modal -->
-        <div class="modal fade" id="detailFeedbackModal{{ $feedback->id }}" tabindex="-1"
-            aria-labelledby="detailFeedbackModalLabel{{ $feedback->id }}" aria-hidden="true">
+    <!-- Detail & Delete Modals for each Hasil Diagnosa -->
+    @foreach ($hasilDiagnosa as $hasil)
+        <!-- Detail Hasil Diagnosa Modal -->
+        <div class="modal fade" id="detailHasilModal{{ $hasil->id }}" tabindex="-1"
+            aria-labelledby="detailHasilModalLabel{{ $hasil->id }}" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg">
                 <div class="modal-content custom-modal">
                     <div class="modal-header custom-modal-header">
-                        <h5 class="modal-title fw-bold" id="detailFeedbackModalLabel{{ $feedback->id }}">Detail Feedback</h5>
+                        <h5 class="modal-title fw-bold" id="detailHasilModalLabel{{ $hasil->id }}">Detail Hasil Diagnosa</h5>
                     </div>
                     <div class="modal-body custom-modal-body">
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <p class="mb-1 fw-bold">Nama:</p>
-                                <p>{{ $feedback->nama }}</p>
+                                <p class="mb-1 fw-bold">Pasien:</p>
+                                <p>{{ $hasil->user ? $hasil->user->name : 'Pasien Anonim' }}</p>
                             </div>
                             <div class="col-md-6">
-                                <p class="mb-1 fw-bold">Komentar:</p>
-                                <p>{{ $feedback->komentar }}</p>
+                                <p class="mb-1 fw-bold">Tanggal Diagnosa:</p>
+                                <p>{{ $hasil->created_at->format('d/m/Y H:i') }}</p>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <p class="mb-1 fw-bold">Rating:</p>
-                                <p>
-                                    @for ($i = 1; $i <= 5; $i++)
-                                        @if ($i <= $feedback->rating)
-                                            <i class="bi bi-star-fill text-warning"></i>
-                                        @else
-                                            <i class="bi bi-star text-warning"></i>
-                                        @endif
-                                    @endfor
-                                </p>
+                                <p class="mb-1 fw-bold">Penyakit:</p>
+                                <p>{{ $hasil->penyakit->penyakit }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1 fw-bold">Kode Penyakit:</p>
+                                <p>{{ $hasil->penyakit->kode_penyakit }}</p>
                             </div>
                         </div>
                         <div class="row mb-3">
                             <div class="col-12">
-                                <p class="mb-1 fw-bold">Email:</p>
-                                <p>{{ $feedback->email }}</p>
+                                <p class="mb-1 fw-bold">Deskripsi:</p>
+                                <p>{{ $hasil->penyakit->deskripsi }}</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <p class="mb-1 fw-bold">Solusi/Pengobatan:</p>
+                                <p>{{ $hasil->penyakit->solusi }}</p>
                             </div>
                         </div>
                     </div>
@@ -110,20 +104,22 @@
             </div>
         </div>
 
-        <!-- Delete Feedback Modal -->
-        <div class="modal fade" id="deleteFeedbackModal{{ $feedback->id }}" tabindex="-1"
-            aria-labelledby="deleteFeedbackModalLabel{{ $feedback->id }}" aria-hidden="true">
+        <!-- Delete Hasil Diagnosa Modal -->
+        <div class="modal fade" id="deleteHasilModal{{ $hasil->id }}" tabindex="-1"
+            aria-labelledby="deleteHasilModalLabel{{ $hasil->id }}" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content custom-modal">
                     <div class="modal-header custom-modal-header">
-                        <h5 class="modal-title fw-bold" id="deleteFeedbackModalLabel{{ $feedback->id }}">Konfirmasi Hapus
+                        <h5 class="modal-title fw-bold" id="deleteHasilModalLabel{{ $hasil->id }}">Konfirmasi Hapus
                         </h5>
                     </div>
                     <div class="modal-body custom-modal-body">
-                        <p>Apakah Anda yakin ingin menghapus feedback dari <strong>{{ $feedback->nama }}</strong>?</p>
+                        <p>Apakah Anda yakin ingin menghapus hasil diagnosa 
+                           <strong>{{ $hasil->penyakit->penyakit }}</strong> 
+                           untuk pasien <strong>{{ $hasil->user ? $hasil->user->name : 'Anonim' }}</strong>?</p>
                     </div>
                     <div class="modal-footer custom-modal-footer">
-                        <form action="{{ route('admin.feedback.destroy', $feedback->id) }}" method="POST"
+                        <form action="{{ route('admin.hasil.destroy', $hasil->id) }}" method="POST"
                             style="display: inline;">
                             @csrf
                             @method('DELETE')

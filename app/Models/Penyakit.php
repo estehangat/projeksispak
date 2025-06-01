@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\HasilDiagnosa;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Penyakit extends Model
 {
@@ -18,9 +19,8 @@ class Penyakit extends Model
         'solusi',
     ];
 
-    // public $timestamps = false;
-
-    // protected $primaryKey = 'kode_penyakit';
-    // public $incrementing = false;
-    // protected $keyType = 'string';
+    public function hasilDiagnosa()
+    {
+        return $this->hasMany(HasilDiagnosa::class, 'penyakit_id');
+    }
 }

@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Artikel;
-use App\Models\AturanIspa;
-use App\Models\Feedback;
 use App\Models\Gejala;
+use App\Models\Artikel;
+use App\Models\Feedback;
 use App\Models\Penyakit;
-use App\Models\RumahSakit; 
+use App\Models\AturanIspa;
+use App\Models\RumahSakit;
 use Illuminate\Http\Request;
+use App\Models\HasilDiagnosa;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Validator; 
+use Illuminate\Support\Facades\Validator;
 
 class DiagnosaIspaController extends Controller
 {
@@ -172,9 +173,25 @@ class DiagnosaIspaController extends Controller
         $riwayatJawaban = Session::get('riwayat_jawaban');
         $hasilDiagnosa = Session::get('hasil_diagnosa');
 
-        if (!$biodata || !$hasilDiagnosa) { 
+        if (!$biodata || !$hasilDiagnosa) {
             return redirect()->route('diagnosa.start')
                 ->with('error', 'Sesi diagnosa tidak lengkap atau tidak valid. Silakan mulai dari awal.');
+        }
+
+        // Simpan hasil diagnosa ke database jika memiliki kode_penyakit (hasil valid)
+        if (isset($hasilDiagnosa['kode_penyakit']) && !isset($hasilDiagnosa['error'])) {
+            $penyakit = Penyakit::where('kode_penyakit', $hasilDiagnosa['kode_penyakit'])->first();
+
+            if ($penyakit) {
+                // Simpan sebagai tamu (null user_id) jika pengguna tidak login
+                $userId = auth()->check() ? auth()->id() : null;
+
+                // Simpan data hasil diagnosa
+                HasilDiagnosa::create([
+                    'user_id' => $userId,
+                    'penyakit_id' => $penyakit->id,
+                ]);
+            }
         }
 
         return view('diagnosa.hasil', compact('biodata', 'riwayatJawaban', 'hasilDiagnosa'));
@@ -191,7 +208,7 @@ class DiagnosaIspaController extends Controller
                 $diagnosaNamaPenyakit = $penyakit->penyakit;
             }
         }
-        
+
         return view('diagnosa.feedback_form', compact('diagnosaKodePenyakit', 'diagnosaNamaPenyakit'));
     }
 
@@ -202,7 +219,7 @@ class DiagnosaIspaController extends Controller
             'email'                  => 'nullable|email|max:255',
             'rating'                 => 'nullable|integer|min:1|max:5',
             'komentar'               => 'required|string|min:10|max:5000',
-            'diagnosa_penyakit_kode' => 'nullable|string|max:255|exists:penyakit,kode_penyakit', 
+            'diagnosa_penyakit_kode' => 'nullable|string|max:255|exists:penyakit,kode_penyakit',
         ]);
 
         $diagnosaKodePenyakit = $request->input('diagnosa_penyakit_kode');
@@ -220,7 +237,7 @@ class DiagnosaIspaController extends Controller
             'email'             => $request->input('email'),
             'rating'            => $request->input('rating'),
             'komentar'          => $request->input('komentar'),
-            'diagnosa_penyakit' => $diagnosaKodePenyakit, 
+            'diagnosa_penyakit' => $diagnosaKodePenyakit,
             'sesi_diagnosa'     => session()->has('riwayat_jawaban') ? json_encode(session('riwayat_jawaban')) : null,
         ]);
 

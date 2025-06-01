@@ -2,11 +2,10 @@
     <a href="{{ route('admin.dashboard') }}" class="sidebar-header">Dashboard</a>
 
     <div class="sidebar-section">Pengetahuan</div>
-    <a href="#" class="sidebar-item">Diagnosa</a>
     <a href="{{ route('admin.gejala') }}" class="sidebar-item">Gejala</a>
     <a href="{{ route('admin.penyakit') }}" class="sidebar-item">Penyakit</a>
     <a href="{{ route('admin.faskes') }}" class="sidebar-item">Faskes</a>
-    <a href="#" class="sidebar-item">Hasil</a>
+    <a href="{{ route('admin.hasil') }}" class="sidebar-item">Hasil</a>
     <a href="{{ route('admin.feedback') }}" class="sidebar-item">Feedback</a>
     <a href="{{ route('admin.artikel') }}" class="sidebar-item">Artikel</a>
 
