@@ -111,7 +111,7 @@ class DiagnosaIspaController extends Controller
     public function processAnswer(Request $request)
     {
         $request->validate([
-            'kode_gejala_sekarang' => 'required|string|exists:gejala,kode_gejala',
+            'kode_gejala_sekarang' => 'required|string|exists:gejala,kode_gejala', 
             'jawaban'              => 'required|in:YA,TIDAK',
         ]);
 
@@ -147,7 +147,16 @@ class DiagnosaIspaController extends Controller
                     'deskripsi'     => $penyakit->deskripsi,
                     'solusi'        => $penyakit->solusi,
                     'kode_penyakit' => $penyakit->kode_penyakit,
+                    'penyakit_id_internal' => $penyakit->id 
                 ]);
+
+                if (Auth::check()) {
+                    HasilDiagnosa::create([
+                        'user_id' => Auth::id(),
+                        'penyakit_id' => $penyakit->id,
+                    ]);
+                }
+
             } else {
                 Session::put('hasil_diagnosa', ['error' => 'Data penyakit dengan kode ' . $aturan->id_penyakit_hasil . ' tidak ditemukan.']);
             }

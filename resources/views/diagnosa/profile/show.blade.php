@@ -8,7 +8,7 @@
         background: linear-gradient(135deg, #6C63FF 0%, #4f46e5 100%);
         color: white;
         padding: 2.5rem 0;
-        margin-bottom: -3rem; 
+        margin-bottom: -3rem;
         border-radius: 0 0 25px 25px;
         position: relative;
         z-index: 1;
@@ -37,7 +37,7 @@
         align-items: center;
         justify-content: center;
         font-size: 3rem;
-        margin: -80px auto 1.5rem auto; 
+        margin: -80px auto 1.5rem auto;
         border: 5px solid #FFFFFF;
         box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     }
@@ -94,11 +94,28 @@
     .info-item .info-content .info-value a:hover {
         text-decoration: underline;
     }
+    .btn-edit-profile, .btn-change-password {
+        background-color: #6C63FF;
+        border-color: #6C63FF;
+        color: #FFFFFF;
+        font-weight: 500;
+        padding: 0.6rem 1.5rem;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 0.5rem;
+    }
+    .btn-edit-profile:hover, .btn-change-password:hover {
+        background-color: #5750d6;
+        border-color: #5750d6;
+        transform: translateY(-2px);
+    }
     .placeholder-text {
         color: #718096;
         font-style: italic;
     }
-     .history-item {
+    .history-item {
         padding: 0.75rem 0;
         border-bottom: 1px dashed #eee;
     }
@@ -133,7 +150,6 @@
         </div>
     </div>
     <br><br>
-
     <div class="container mt-n5">
         <div class="row justify-content-center">
             <div class="col-lg-8 col-md-10">
@@ -144,6 +160,11 @@
                         </div>
                         
                         <h2 class="profile-name">{{ $namaProfil ?? 'Pengguna Tamu' }}</h2>
+                        @if(isset($emailProfil) && $emailProfil)
+                            <p class="profile-email"><i class="fas fa-envelope me-1 opacity-75"></i> {{ $emailProfil }}</p>
+                        @else
+                            <p class="profile-email placeholder-text"><em>Email tidak tersedia</em></p>
+                        @endif
                     </div>
 
                     <div class="mt-4">
@@ -159,17 +180,25 @@
                             <i class="fas fa-envelope icon"></i>
                             <div class="info-content">
                                 <span class="info-label">Email Terdaftar:</span>
-                                <span class="info-value">{{ $emailProfil ?? '-' }}</span>
+                                <span class="info-value">{{ $emailProfil ?? 'Tidak ada data email akun.' }}</span>
                             </div>
                         </div>
-                       
+                        @if(isset($usiaProfil) && $usiaProfil)
+                        <div class="info-item">
+                            <i class="fas fa-birthday-cake icon"></i>
+                            <div class="info-content">
+                                <span class="info-label">Usia (dari sesi diagnosa terakhir):</span>
+                                <span class="info-value">{{ $usiaProfil }} tahun</span>
+                            </div>
+                        </div>
+                        @endif
+                        
                         <div class="profile-section-title">Keamanan</div>
                         <div class="info-item">
                             <i class="fas fa-key icon"></i>
                             <div class="info-content">
                                 <span class="info-label">Password:</span>
                                 <span class="info-value">Dilindungi (********) 
-                                    {{-- <a href="#" class="btn btn-sm btn-outline-secondary ms-2">Ubah Password</a> --}}
                                 </span>
                             </div>
                         </div>
@@ -177,28 +206,31 @@
                         <div class="profile-section-title">Riwayat Diagnosa</div>
                         <div class="info-item">
                             <i class="fas fa-history icon"></i>
-                            <div class="info-content">
-                                 <span class="info-value placeholder-text">
-                                    @if(is_array($riwayatDiagnosaUser) && count($riwayatDiagnosaUser) > 0)
+                            <div class="info-content w-100"> 
+                                @if(isset($riwayatDiagnosaUser) && $riwayatDiagnosaUser->count() > 0)
+                                    <ul class="history-list">
                                         @foreach($riwayatDiagnosaUser as $riwayat)
-                                            <div class="history-item">
-                                                <span class="date">{{-- $riwayat->tanggal_diagnosa_formatted --}}Tanggal: XX-XX-XXXX</span><br>
-                                                Hasil: <span class="result">{{-- $riwayat->nama_penyakit_hasil --}}Penyakit Contoh</span>
-                                            </div>
+                                            <li class="history-item">
+                                                <span class="date"><i class="fas fa-calendar-alt me-1"></i> {{ $riwayat->created_at->format('d F Y, H:i') }}</span>
+                                                <div class="result">Hasil: <span class="penyakit-name">{{ $riwayat->penyakit->penyakit ?? 'Penyakit tidak diketahui' }}</span></div>
+                                            </li>
                                         @endforeach
-                                    @else
-                                        <em>Belum ada riwayat diagnosa yang tersimpan atau fitur ini belum aktif.</em>
-                                    @endif
-                                 </span>
+                                    </ul>
+                                    <div class="mt-3 d-flex justify-content-center">
+                                        {{ $riwayatDiagnosaUser->links('pagination::bootstrap-4') }}
+                                    </div>
+                                @else
+                                    <span class="info-value placeholder-text"><em>Belum ada riwayat diagnosa yang tersimpan.</em></span>
+                                @endif
                             </div>
                         </div>
-                    </div> <br> <br>
+                    </div>
 
                     <div class="mt-4 pt-3 text-center border-top">
                         <form method="POST" action="{{ route('admin.logout') }}" id="logout-form-profile" class="d-inline">
                             @csrf
                             <a class="btn btn-danger" href="{{ route('admin.logout') }}"
-                            onclick="event.preventDefault(); document.getElementById('logout-form-profile').submit();">
+                               onclick="event.preventDefault(); document.getElementById('logout-form-profile').submit();">
                                 <i class="fas fa-sign-out-alt me-1"></i> Logout dari Akun
                             </a>
                         </form>
