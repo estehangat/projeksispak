@@ -9,7 +9,11 @@ use App\Models\Penyakit;
 use App\Models\AturanIspa;
 use App\Models\RumahSakit;
 use Illuminate\Http\Request;
+<<<<<<< HEAD
 use App\Models\HasilDiagnosa;
+=======
+use Illuminate\Support\Facades\Auth;
+>>>>>>> 4f756b256997ecddb843c58c06f282c28ce20c28
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
@@ -41,7 +45,22 @@ class DiagnosaIspaController extends Controller
 
     public function showBiodataForm()
     {
-        return view('diagnosa.biodata');
+        $namaTerisiOtomatis = null;
+        $usiaDariSesi = null; 
+
+        $biodataSesi = Session::get('biodata');
+        if ($biodataSesi && isset($biodataSesi['nama'])) {
+            $namaTerisiOtomatis = $biodataSesi['nama'];
+        }
+        if ($biodataSesi && isset($biodataSesi['usia'])) {
+            $usiaDariSesi = $biodataSesi['usia'];
+        }
+
+        if (is_null($namaTerisiOtomatis) && Auth::check()) {
+            $namaTerisiOtomatis = Auth::user()->name;
+        }
+
+        return view('diagnosa.biodata', compact('namaTerisiOtomatis', 'usiaDariSesi'));
     }
 
     public function submitBiodataAndStart(Request $request)
