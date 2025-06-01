@@ -165,7 +165,7 @@ class DiagnosaIspaController extends Controller
         $diagnosaKodePenyakit = $request->query('kode_penyakit');
         $diagnosaNamaPenyakit = $request->query('nama_penyakit');
 
-        return view('diagnosa.feedback.form', compact('diagnosaKodePenyakit', 'diagnosaNamaPenyakit'));
+        return view('diagnosa.feedback_form', compact('diagnosaKodePenyakit', 'diagnosaNamaPenyakit'));
     }
 
     public function storeFeedback(Request $request)
