@@ -8,7 +8,7 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
     <meta http-equiv="Pragma" content="no-cache">
     <meta http-equiv="Expires" content="0">
-    <title>Admin Login</title>
+    <title>Admin Register</title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -20,12 +20,12 @@
             justify-content: center;
         }
 
-        .login-container {
+        .register-container {
             width: 100%;
             max-width: 450px;
         }
 
-        .login-card {
+        .register-card {
             width: 100%;
             padding: 30px;
             border-radius: 10px;
@@ -33,12 +33,12 @@
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
-        .login-header {
+        .register-header {
             text-align: center;
             margin-bottom: 30px;
         }
 
-        .btn-login {
+        .btn-register {
             background-color: #3d5af1;
             border-color: #3d5af1;
             padding: 8px 25px;
@@ -47,8 +47,8 @@
         .form-check-input {
             margin-top: 0.3rem;
         }
-
-        .register-link {
+        
+        .login-link {
             text-align: center;
             margin-top: 20px;
         }
@@ -56,54 +56,54 @@
 </head>
 
 <body>
-    <div class="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                <h2 class="fw-bold">Login</h2>
+    <div class="register-container">
+        <div class="register-card">
+            <div class="register-header">
+                <h2 class="fw-bold">Register</h2>
             </div>
-            @if (session('success'))
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{ session('success') }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            @endif
 
-            <form action="{{ route('admin.login.authenticate') }}" method="POST">
+            <form action="{{ route('admin.register.store') }}" method="POST">
                 @csrf
 
                 <div class="mb-3">
+                    <label for="name" class="form-label">Name</label>
+                    <input type="text" class="form-control @error('name') is-invalid @enderror"
+                        id="name" name="name" value="{{ old('name') }}" required autofocus>
+                    @error('name')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="email"
-                        name="email" value="{{ old('email') }}" required autofocus>
+                    <input type="email" class="form-control @error('email') is-invalid @enderror"
+                        id="email" name="email" value="{{ old('email') }}" required>
                     @error('email')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
 
-                <div class="mb-4">
+                <div class="mb-3">
                     <label for="password" class="form-label">Password</label>
-                    <input type="password" class="form-control @error('password') is-invalid @enderror" id="password"
-                        name="password" required>
+                    <input type="password" class="form-control @error('password') is-invalid @enderror"
+                        id="password" name="password" required>
                     @error('password')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
 
                 <div class="mb-4">
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="remember" name="remember">
-                        <label class="form-check-label" for="remember">
-                            Remember Me
-                        </label>
-                    </div>
+                    <label for="password_confirmation" class="form-label">Confirm Password</label>
+                    <input type="password" class="form-control"
+                        id="password_confirmation" name="password_confirmation" required>
                 </div>
 
                 <div class="d-flex justify-content-center">
-                    <button type="submit" class="btn btn-primary btn-login">Login</button>
+                    <button type="submit" class="btn btn-primary btn-register">Register</button>
                 </div>
-
-                <div class="register-link">
-                    <p>Don't have an account? <a href="{{ route('admin.register') }}">Create Account</a></p>
+                
+                <div class="login-link">
+                    <p>Already have an account? <a href="{{ route('admin.login') }}">Login</a></p>
                 </div>
             </form>
         </div>

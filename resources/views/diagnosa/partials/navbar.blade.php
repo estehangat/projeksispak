@@ -28,10 +28,6 @@
                         <i class="fas fa-comment-dots me-1"></i> Feedback
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="btn btn-nav-outline" href="{{ route('admin.login') }}">  <i class="fas fa-sign-in-alt me-1"></i> Login Admin
-                    </a>
-                </li>
             </ul>
         </div>
     </div>

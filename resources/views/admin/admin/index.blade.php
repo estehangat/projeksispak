@@ -7,20 +7,21 @@
 @section('content')
     <div class="main-content">
         <div class="container background-white p-5 rounded-4 shadow-sm">
-            <h1 class="mb-4 fw-bold">Daftar Admin</h1>
+            <h1 class="mb-4 fw-bold">Daftar Pengguna</h1>
 
             <!-- Table -->
             <a href="#" class="btn btn-outline-success mb-3 rounded-pill" data-bs-toggle="modal"
                 data-bs-target="#addAdminModal">
-                <i class="bi bi-plus-circle"></i> Tambah Admin
+                <i class="bi bi-plus-circle"></i> Tambah Pengguna
             </a>
             <div class="table-responsive">
                 <table class="table table-bordered">
                     <thead>
                         <tr class="table-header">
                             <th style="width: 50px;">#</th>
-                            <th style="width: 100px;">ROLE</th>
+                            <th style="width: 100px;">NAMA</th>
                             <th style="width: 100px;">EMAIL</th>
+                            <th style="width: 100px;">ROLE</th>
                             <th style="width: 100px">AKSI</th>
                         </tr>
                     </thead>
@@ -28,10 +29,9 @@
                         @foreach ($admins as $admin)
                             <tr>
                                 <td class="text-left">{{ $loop->iteration }}</td>
-                                <td class="text-left">
-                                    {{ $admin->name === 'admin' ? 'Admin' : ($admin->name === 'pakar' ? 'Pakar' : $admin->name) }}
-                                </td>
+                                <td class="text-left">{{ $admin->name }}</td>
                                 <td class="text-left">{{ $admin->email }}</td>
+                                <td class="text-left">{{ $admin->role }}</td>
                                 <td class="text-left">
                                     <div class="d-flex gap-2">
                                         <button class="btn btn-sm btn-warning" title="Edit" data-bs-toggle="modal"
@@ -57,17 +57,22 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content custom-modal">
                 <div class="modal-header custom-modal-header">
-                    <h5 class="modal-title fw-bold" id="addAdminModalLabel">Tambah Admin</h5>
+                    <h5 class="modal-title fw-bold" id="addAdminModalLabel">Tambah Pengguna</h5>
                 </div>
                 <form action="{{ route('admin.admin.store') }}" method="POST">
                     @csrf
                     <div class="modal-body custom-modal-body">
                         <div class="row g-3">
                             <div class="col-md-12 mb-2">
-                                <select class="form-select custom-input" id="name" name="name" required>
+                                <input type="text" class="form-control custom-input" id="name" name="name"
+                                    placeholder="Nama Admin" required>
+                            </div>
+                            <div class="col-md-12 mb-2">
+                                <select class="form-select custom-input" id="role" name="role" required>
                                     <option value="" disabled selected>Pilih Role</option>
                                     <option value="admin">Admin</option>
                                     <option value="pakar">Pakar</option>
+                                    <option value="user">User</option>
                                 </select>
                             </div>
                             <div class="col-md-12 mb-2">
@@ -102,7 +107,7 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content custom-modal">
                     <div class="modal-header custom-modal-header">
-                        <h5 class="modal-title fw-bold" id="editAdminModalLabel{{ $admin->id }}">Edit Admin</h5>
+                        <h5 class="modal-title fw-bold" id="editAdminModalLabel{{ $admin->id }}">Edit Pengguna</h5>
                     </div>
                     <form action="{{ route('admin.admin.update', $admin->id) }}" method="POST">
                         @csrf
@@ -110,12 +115,15 @@
                         <div class="modal-body custom-modal-body">
                             <div class="row g-3">
                                 <div class="col-md-12 mb-2">
-                                    <select class="form-select custom-input" id="edit_name{{ $admin->id }}"
-                                        name="name" required>
-                                        <option value="admin" {{ $admin->name === 'admin' ? 'selected' : '' }}>Admin
-                                        </option>
-                                        <option value="pakar" {{ $admin->name === 'pakar' ? 'selected' : '' }}>Pakar
-                                        </option>
+                                    <input type="text" class="form-control custom-input" id="edit_name{{ $admin->id }}"
+                                        name="name" value="{{ $admin->name }}" placeholder="Nama Admin" required>
+                                </div>
+                                <div class="col-md-12 mb-2">
+                                    <select class="form-select custom-input" id="edit_role{{ $admin->id }}"
+                                        name="role" required>
+                                        <option value="admin" {{ $admin->role === 'admin' ? 'selected' : '' }}>Admin</option>
+                                        <option value="pakar" {{ $admin->role === 'pakar' ? 'selected' : '' }}>Pakar</option>
+                                        <option value="user" {{ $admin->role === 'user' ? 'selected' : '' }}>User</option>
                                     </select>
                                 </div>
                                 <div class="col-md-12 mb-2">
@@ -155,7 +163,7 @@
                         </h5>
                     </div>
                     <div class="modal-body custom-modal-body">
-                        <p>Apakah Anda yakin ingin menghapus admin <strong>{{ $admin->name }}</strong> dengan
+                        <p>Apakah Anda yakin ingin menghapus {{ $admin->role }} <strong>{{ $admin->name }}</strong> dengan
                             email <strong>{{ $admin->email }}</strong>?</p>
                     </div>
                     <div class="modal-footer custom-modal-footer">

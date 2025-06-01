@@ -43,6 +43,7 @@
         border-color: #5750d6; 
         transform: translateY(-2px);
         box-shadow: 0 4px 15px rgba(108, 99, 255, 0.3);
+        color: #FFFFFF;
     }
     .hero-image-container { 
         display: flex; 
