@@ -5,7 +5,10 @@
     <a href="#" class="sidebar-item">Diagnosa</a>
     <a href="{{ route('admin.gejala') }}" class="sidebar-item">Gejala</a>
     <a href="{{ route('admin.penyakit') }}" class="sidebar-item">Penyakit</a>
+    <a href="{{ route('admin.faskes') }}" class="sidebar-item">Faskes</a>
     <a href="#" class="sidebar-item">Hasil</a>
+    <a href="{{ route('admin.feedback') }}" class="sidebar-item">Feedback</a>
+    <a href="{{ route('admin.artikel') }}" class="sidebar-item">Artikel</a>
 
     <div class="sidebar-section">Pengaturan</div>
     <a href="{{ route('admin.admin') }}" class="sidebar-item">Admin</a>

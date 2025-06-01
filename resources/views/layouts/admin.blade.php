@@ -21,6 +21,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     @vite(['resources/sass/app.scss', 'resources/js/app.js'])
     @stack('styles')
+    @stack('scripts')
 </head>
 
 <body style="background-color: #C8CADD;">

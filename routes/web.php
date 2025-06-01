@@ -1,13 +1,25 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Request;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\GejalaController;
-use App\Http\Controllers\PenyakitController;
-use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\DiagnosaIspaController;
-use App\Http\Controllers\RumahSakitController;
 use App\Http\Controllers\ArtikelController;
+use App\Http\Controllers\FeedbackController;
+use App\Http\Controllers\PenyakitController;
+use App\Http\Controllers\RumahSakitController;
+use App\Http\Controllers\DiagnosaIspaController;
+use App\Http\Controllers\AdminDashboardController;
+
+
+Route::get('/test-kabupatens/{provinsi_id}', function($provinsi_id) {
+    $kabupatens = App\Models\Kabupaten::where('provinsi_id', $provinsi_id)
+                ->orderBy('nama_kabupaten')
+                ->get(['id', 'nama_kabupaten']);
+    
+    return response()->json($kabupatens);
+});
+Route::get('/api/get-kabupatens/{provinsi_id}', [RumahSakitController::class, 'getKabupatensByProvinsi']);
 
 Route::get('/', function () {
     return redirect()->route('diagnosa.start');
@@ -68,4 +80,26 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::delete('/gejala/{id}', [GejalaController::class, 'destroy'])
         ->name('gejala.destroy');
 
+    Route::get('/artikel', [ArtikelController::class, 'adminIndex'])
+        ->name('artikel');
+    Route::post('/artikel', [ArtikelController::class, 'store'])
+        ->name('artikel.store');
+    Route::put('/artikel/{id}', [ArtikelController::class, 'update'])
+        ->name('artikel.update');
+    Route::delete('/artikel/{id}', [ArtikelController::class, 'destroy'])
+        ->name('artikel.destroy');
+
+    Route::get('/faskes', [RumahSakitController::class, 'adminIndex'])
+        ->name('faskes');
+    Route::post('/faskes', [RumahSakitController::class, 'store'])
+        ->name('faskes.store');
+    Route::put('/faskes/{id}', [RumahSakitController::class, 'update'])
+        ->name('faskes.update');
+    Route::delete('/faskes/{id}', [RumahSakitController::class, 'destroy'])
+        ->name('faskes.destroy');
+
+    Route::get('/feedback', [FeedbackController::class, 'index'])
+    ->name('feedback');
+    Route::delete('/feedback/{id}', [FeedbackController::class, 'destroy'])
+    ->name('feedback.destroy');
 });
