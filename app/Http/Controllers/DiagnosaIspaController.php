@@ -9,11 +9,8 @@ use App\Models\Penyakit;
 use App\Models\AturanIspa;
 use App\Models\RumahSakit;
 use Illuminate\Http\Request;
-<<<<<<< HEAD
 use App\Models\HasilDiagnosa;
-=======
 use Illuminate\Support\Facades\Auth;
->>>>>>> 4f756b256997ecddb843c58c06f282c28ce20c28
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
 
