@@ -7,12 +7,13 @@ use App\Http\Controllers\GejalaController;
 use App\Http\Controllers\ArtikelController;
 use App\Http\Controllers\FeedbackController;
 use App\Http\Controllers\PenyakitController;
+use App\Http\Controllers\AturanIspaController;
 use App\Http\Controllers\RumahSakitController;
-use App\Http\Controllers\DiagnosaIspaController;
-use App\Http\Controllers\AdminDashboardController;
-use App\Http\Controllers\HasilDiagnosaController;
-use App\Http\Controllers\PakarDashboardController;
 use App\Http\Controllers\UserProfileController;
+use App\Http\Controllers\DiagnosaIspaController;
+use App\Http\Controllers\HasilDiagnosaController;
+use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\PakarDashboardController;
 use App\Http\Controllers\RiwayatDiagnosaController;
 
 Route::get('/test-kabupatens/{provinsi_id}', function ($provinsi_id) {
@@ -58,9 +59,8 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/artikel-kesehatan', [ArtikelController::class, 'index'])->name('artikel.index');
 
         Route::get('/profil-akun', [UserProfileController::class, 'show'])->name('user.profile');
-        
-        Route::get('/profil-akun/riwayat/{hasilDiagnosa}', [RiwayatDiagnosaController::class, 'show'])->name('user.riwayat.detail');
 
+        Route::get('/profil-akun/riwayat/{hasilDiagnosa}', [RiwayatDiagnosaController::class, 'show'])->name('user.riwayat.detail');
     });
 
     Route::prefix('admin')->name('admin.')->group(function () {
@@ -121,6 +121,15 @@ Route::group(['middleware' => 'auth'], function () {
             ->name('hasil');
         Route::delete('/hasil/{id}', [HasilDiagnosaController::class, 'destroy'])
             ->name('hasil.destroy');
+
+        Route::get('/aturan', [AturanIspaController::class, 'index'])
+            ->name('aturan');
+        Route::post('/aturan', [AturanIspaController::class, 'store'])
+            ->name('aturan.store');
+        Route::put('/aturan/{id}', [AturanIspaController::class, 'update'])
+            ->name('aturan.update');
+        Route::delete('/aturan/{id}', [AturanIspaController::class, 'destroy'])
+            ->name('aturan.destroy');
     });
 
     Route::prefix('pakar')->name('pakar.')->group(function () {

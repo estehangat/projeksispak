@@ -2,6 +2,7 @@
     <a href="{{ route('admin.dashboard') }}" class="sidebar-header">Dashboard</a>
 
     <div class="sidebar-section">Pengetahuan</div>
+    <a href="{{ route('admin.aturan') }}" class="sidebar-item">Aturan</a>
     <a href="{{ route('admin.gejala') }}" class="sidebar-item">Gejala</a>
     <a href="{{ route('admin.penyakit') }}" class="sidebar-item">Penyakit</a>
     <a href="{{ route('admin.faskes') }}" class="sidebar-item">Faskes</a>
