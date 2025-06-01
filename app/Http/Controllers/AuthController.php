@@ -28,7 +28,15 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->has('remember'))) {
             $request->session()->regenerate();
 
-            return redirect()->intended(route('admin.dashboard'));
+            // Redirect berdasarkan role (name) user
+            if (Auth::user()->name === 'admin') {
+                return redirect()->route('admin.dashboard');
+            } elseif (Auth::user()->name === 'pakar') {
+                return redirect()->route('pakar.dashboard');
+            }
+
+            // Default redirect jika role tidak dikenali
+            return redirect()->route('admin.dashboard');
         }
 
         return back()->withErrors([
@@ -51,6 +59,6 @@ class AuthController extends Controller
                 'Cache-Control' => 'no-store, no-cache, must-revalidate, max-age=0',
                 'Pragma' => 'no-cache',
                 'Expires' => 'Sat, 01 Jan 2000 00:00:00 GMT',
-        ]);
+            ]);
     }
 }
