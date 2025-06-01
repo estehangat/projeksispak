@@ -12,8 +12,15 @@ class HasilDiagnosa extends Model
     protected $fillable = [
         'user_id',
         'penyakit_id',
+        'biodata_sesi',
+        'riwayat_jawaban_sesi',
         'created_at',
         'updated_at',
+    ];
+
+    protected $casts = [
+        'biodata_sesi' => 'array',
+        'riwayat_jawaban_sesi' => 'array',
     ];
 
     public function user()

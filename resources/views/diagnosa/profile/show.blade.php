@@ -203,16 +203,23 @@
                             </div>
                         </div>
 
-                        <div class="profile-section-title">Riwayat Diagnosa</div>
+<div class="profile-section-title">Riwayat Diagnosa</div>
                         <div class="info-item">
                             <i class="fas fa-history icon"></i>
-                            <div class="info-content w-100"> 
+                            <div class="info-content w-100">
                                 @if(isset($riwayatDiagnosaUser) && $riwayatDiagnosaUser->count() > 0)
                                     <ul class="history-list">
                                         @foreach($riwayatDiagnosaUser as $riwayat)
                                             <li class="history-item">
-                                                <span class="date"><i class="fas fa-calendar-alt me-1"></i> {{ $riwayat->created_at->format('d F Y, H:i') }}</span>
-                                                <div class="result">Hasil: <span class="penyakit-name">{{ $riwayat->penyakit->penyakit ?? 'Penyakit tidak diketahui' }}</span></div>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div>
+                                                        <span class="date"><i class="fas fa-calendar-alt me-1"></i> {{ $riwayat->created_at->format('d F Y, H:i') }}</span>
+                                                        <div class="result">Hasil: <span class="penyakit-name">{{ $riwayat->penyakit->penyakit ?? 'Penyakit tidak diketahui' }}</span></div>
+                                                    </div>
+                                                    <a href="{{ route('user.riwayat.detail', $riwayat->id) }}" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-eye me-1"></i> Detail
+                                                    </a>
+                                                </div>
                                             </li>
                                         @endforeach
                                     </ul>
@@ -224,8 +231,7 @@
                                 @endif
                             </div>
                         </div>
-                    </div>
-
+                        
                     <div class="mt-4 pt-3 text-center border-top">
                         <form method="POST" action="{{ route('admin.logout') }}" id="logout-form-profile" class="d-inline">
                             @csrf
