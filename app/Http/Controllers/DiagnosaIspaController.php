@@ -7,10 +7,10 @@ use App\Models\AturanIspa;
 use App\Models\Feedback;
 use App\Models\Gejala;
 use App\Models\Penyakit;
-use App\Models\RumahSakit;
+use App\Models\RumahSakit; 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Validator; 
 
 class DiagnosaIspaController extends Controller
 {
@@ -20,8 +20,8 @@ class DiagnosaIspaController extends Controller
 
         $artikelTerbaru = Artikel::where('status', 'published')
             ->whereNotNull('published_at')
-            ->orderBy('published_at', 'desc') 
-            ->orderBy('updated_at', 'desc')   
+            ->orderBy('published_at', 'desc')
+            ->orderBy('updated_at', 'desc')
             ->take(3)
             ->get();
 
@@ -47,7 +47,7 @@ class DiagnosaIspaController extends Controller
     {
         $request->validate([
             'nama' => 'required|string|max:255',
-            'usia' => 'required|integer|min:0|max:150', 
+            'usia' => 'required|integer|min:0|max:150',
         ]);
 
         Session::put('biodata', [
@@ -55,7 +55,7 @@ class DiagnosaIspaController extends Controller
             'usia' => $request->input('usia'),
         ]);
         Session::put('riwayat_jawaban', []);
-        Session::forget('hasil_diagnosa'); 
+        Session::forget('hasil_diagnosa');
 
         $aturanAwal = AturanIspa::where('is_pertanyaan_awal', true)->first();
 
@@ -64,7 +64,7 @@ class DiagnosaIspaController extends Controller
                 ->with('error', 'Sistem pakar belum siap atau aturan awal tidak valid.');
         }
 
-        Session::put('kode_gejala_sekarang', $aturanAwal->id_gejala_sekarang);
+        Session::put('kode_gejala_sekarang', $aturanAwal->id_gejala_sekarang); 
         return redirect()->route('diagnosa.pertanyaan');
     }
 
@@ -77,7 +77,7 @@ class DiagnosaIspaController extends Controller
                 return redirect()->route('diagnosa.hasil');
             }
             return redirect()->route('diagnosa.start')
-                ->with('error', 'Sesi diagnosa tidak ditemukan. Silakan mulai dari awal.');
+                ->with('error', 'Sesi diagnosa tidak ditemukan atau telah selesai. Silakan mulai dari awal.');
         }
 
         $gejala = Gejala::where('kode_gejala', $kodeGejalaSekarang)->first();
@@ -94,7 +94,7 @@ class DiagnosaIspaController extends Controller
     public function processAnswer(Request $request)
     {
         $request->validate([
-            'kode_gejala_sekarang' => 'required|string|exists:gejalas,kode_gejala',
+            'kode_gejala_sekarang' => 'required|string|exists:gejala,kode_gejala',
             'jawaban'              => 'required|in:YA,TIDAK',
         ]);
 
@@ -115,7 +115,9 @@ class DiagnosaIspaController extends Controller
             ->first();
 
         if (!$aturan) {
-            Session::put('hasil_diagnosa', ['error' => 'Tidak dapat menentukan langkah selanjutnya berdasarkan kombinasi gejala dan jawaban yang diberikan. Aturan tidak ditemukan.']);
+            Session::put('hasil_diagnosa', [
+                'kesimpulan' => 'Berdasarkan jawaban yang Anda berikan, sistem tidak dapat menyimpulkan diagnosa penyakit ISPA tertentu dari jalur ini. Mungkin gejala Anda tidak cukup spesifik atau memerlukan evaluasi lebih lanjut dari tenaga medis.'
+            ]);
             Session::forget('kode_gejala_sekarang');
             return redirect()->route('diagnosa.hasil');
         }
@@ -127,7 +129,7 @@ class DiagnosaIspaController extends Controller
                     'nama_penyakit' => $penyakit->penyakit,
                     'deskripsi'     => $penyakit->deskripsi,
                     'solusi'        => $penyakit->solusi,
-                    'kode_penyakit' => $penyakit->kode_penyakit, 
+                    'kode_penyakit' => $penyakit->kode_penyakit,
                 ]);
             } else {
                 Session::put('hasil_diagnosa', ['error' => 'Data penyakit dengan kode ' . $aturan->id_penyakit_hasil . ' tidak ditemukan.']);
@@ -141,7 +143,9 @@ class DiagnosaIspaController extends Controller
             return redirect()->route('diagnosa.pertanyaan');
         }
 
-        Session::put('hasil_diagnosa', ['error' => 'Alur diagnosa tidak lengkap pada aturan ini. Tidak ada penyakit hasil atau gejala selanjutnya.']);
+        Session::put('hasil_diagnosa', [
+            'kesimpulan' => 'Alur diagnosa tidak lengkap pada aturan ini. Sistem tidak dapat melanjutkan. Mohon periksa konfigurasi aturan sistem pakar.'
+        ]);
         Session::forget('kode_gejala_sekarang');
         return redirect()->route('diagnosa.hasil');
     }
@@ -152,7 +156,7 @@ class DiagnosaIspaController extends Controller
         $riwayatJawaban = Session::get('riwayat_jawaban');
         $hasilDiagnosa = Session::get('hasil_diagnosa');
 
-        if (!$biodata || !$riwayatJawaban || !$hasilDiagnosa) { 
+        if (!$biodata || !$hasilDiagnosa) { 
             return redirect()->route('diagnosa.start')
                 ->with('error', 'Sesi diagnosa tidak lengkap atau tidak valid. Silakan mulai dari awal.');
         }
@@ -165,6 +169,13 @@ class DiagnosaIspaController extends Controller
         $diagnosaKodePenyakit = $request->query('kode_penyakit');
         $diagnosaNamaPenyakit = $request->query('nama_penyakit');
 
+        if (!$diagnosaNamaPenyakit && $diagnosaKodePenyakit) {
+            $penyakit = Penyakit::where('kode_penyakit', $diagnosaKodePenyakit)->first();
+            if ($penyakit) {
+                $diagnosaNamaPenyakit = $penyakit->penyakit;
+            }
+        }
+        
         return view('diagnosa.feedback_form', compact('diagnosaKodePenyakit', 'diagnosaNamaPenyakit'));
     }
 
@@ -174,16 +185,18 @@ class DiagnosaIspaController extends Controller
             'nama'                   => 'nullable|string|max:255',
             'email'                  => 'nullable|email|max:255',
             'rating'                 => 'nullable|integer|min:1|max:5',
-            'komentar'               => 'required|string|min:10|max:5000', 
-            'diagnosa_penyakit_kode' => 'nullable|string|max:255', 
+            'komentar'               => 'required|string|min:10|max:5000',
+            'diagnosa_penyakit_kode' => 'nullable|string|max:255|exists:penyakit,kode_penyakit', 
         ]);
 
+        $diagnosaKodePenyakit = $request->input('diagnosa_penyakit_kode');
+        $diagnosaNamaPenyakit = $this->getNamaPenyakitFromKode($diagnosaKodePenyakit);
+
+
         if ($validator->fails()) {
-            return redirect()->route('diagnosa.feedback.form')
+            return redirect()->route('diagnosa.feedback.form', ['kode_penyakit' => $diagnosaKodePenyakit, 'nama_penyakit' => $diagnosaNamaPenyakit])
                 ->withErrors($validator)
-                ->withInput()
-                ->with('diagnosaKodePenyakit', $request->input('diagnosa_penyakit_kode'))
-                ->with('diagnosaNamaPenyakit', $this->getNamaPenyakitFromKode($request->input('diagnosa_penyakit_kode')));
+                ->withInput();
         }
 
         Feedback::create([
@@ -191,11 +204,11 @@ class DiagnosaIspaController extends Controller
             'email'             => $request->input('email'),
             'rating'            => $request->input('rating'),
             'komentar'          => $request->input('komentar'),
-            'diagnosa_penyakit' => $request->input('diagnosa_penyakit_kode'),
+            'diagnosa_penyakit' => $diagnosaKodePenyakit, 
             'sesi_diagnosa'     => session()->has('riwayat_jawaban') ? json_encode(session('riwayat_jawaban')) : null,
         ]);
 
-        return redirect()->route('diagnosa.feedback.form')
+        return redirect()->route('diagnosa.feedback.form', ['kode_penyakit' => $diagnosaKodePenyakit, 'nama_penyakit' => $diagnosaNamaPenyakit])
             ->with('showSuccessModal', true)
             ->with('feedback_success_message', 'Terima kasih! Masukan Anda telah berhasil dikirim dan sangat berharga bagi kami.');
     }
