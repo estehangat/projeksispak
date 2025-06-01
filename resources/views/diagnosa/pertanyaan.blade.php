@@ -117,7 +117,7 @@
     }
 
     .question-text {
-        font-size: 1.5rem;
+        font-size: 1.6rem;
         color: #3B3A5E;
         font-weight: 600;
         margin-bottom: 2.5rem;
@@ -127,16 +127,19 @@
     .answer-options {
         display: flex;
         justify-content: center;
-        gap: 40px;
+        gap: 30px;
         margin-bottom: 2.5rem;
         flex-wrap: wrap;
     }
+    .answer-options .form-check {
+        padding: 0.5rem 1rem;
+    }
     .form-check-input[type="radio"] {
         border-radius: 50%;
-        width: 1.5em;
-        height: 1.5em;
-        margin-top: 0.1em;
-        border-color: #8987b8;
+        width: 1.6em;
+        height: 1.6em;
+        margin-top: 0.05em;
+        border: 2px solid #8987b8;
         cursor: pointer;
     }
     .form-check-input[type="radio"]:checked {
@@ -147,34 +150,59 @@
         box-shadow: 0 0 0 0.25rem rgba(108, 99, 255, 0.25);
     }
     .form-check-label {
-        font-size: 1.2rem;
+        font-size: 1.25rem;
         color: #3B3A5E;
         font-weight: 500;
-        margin-left: 0.5rem;
+        margin-left: 0.6rem;
         cursor: pointer;
+        line-height: 1.6em;
     }
 
-    .btn-next-question {
-        background-color: #6C63FF;
-        border-color: #6C63FF;
-        color: #FFFFFF;
+    .navigation-buttons-pertanyaan {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1rem;
+        padding-top: 1.5rem;
+    }
+    .btn-nav-pertanyaan {
         font-weight: 600;
         font-size: 1rem;
-        padding: 0.7rem 2.5rem;
-        border-radius: 8px;
-        transition: background-color 0.3s ease;
+        padding: 0.7rem 2rem;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        min-width: 150px;
+        text-align: center;
     }
-    .btn-next-question:hover {
+    .btn-nav-pertanyaan.btn-next {
+        background-color: #6C63FF;
+        border: 2px solid #6C63FF;
+        color: #FFFFFF;
+    }
+    .btn-nav-pertanyaan.btn-next:hover {
         background-color: #5750d6;
         border-color: #5750d6;
+        transform: translateY(-2px);
+    }
+    .btn-nav-pertanyaan.btn-prev {
+        background-color: transparent;
+        border: 2px solid #6C63FF;
+        color: #6C63FF;
+    }
+    .btn-nav-pertanyaan.btn-prev:hover {
+        background-color: #6C63FF;
+        color: #FFFFFF;
+        transform: translateY(-2px);
     }
 
     .riwayat-container {
-        margin-top: 2rem;
+        margin-top: 2.5rem;
         padding: 1.5rem;
         background-color: #f8f9fa;
         border: 1px solid #e9ecef;
         border-radius: 8px;
+        font-size: 0.9rem;
     }
     .riwayat-container h6 {
         color: #495057;
@@ -183,7 +211,7 @@
     }
     .riwayat-container ul li {
         color: #212529;
-        padding: 0.25rem 0;
+        padding: 0.3rem 0;
         border-bottom: 1px dashed #ced4da;
     }
     .riwayat-container ul li:last-child {
@@ -200,16 +228,22 @@
         }
         .question-area {
             padding: 25px 20px;
+            margin-top: 1.5rem;
         }
         .question-text {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
             margin-bottom: 1.5rem;
         }
         .stepper { max-width: 100%; padding: 0 5px; margin-bottom: 1.5rem; }
         .step-label { font-size: 0.75rem; }
-        .answer-options { gap: 20px; margin-bottom: 1.5rem; }
+        .answer-options { gap: 15px; margin-bottom: 2rem; }
         .form-check-label { font-size: 1.1rem; }
-        .btn-next-question { width: 100%; padding: 0.7rem 1.5rem; }
+        .navigation-buttons-pertanyaan {
+            flex-direction: column-reverse;
+            gap: 1rem;
+            padding-top: 1rem;
+        }
+        .btn-nav-pertanyaan { width: 100%; }
         .riwayat-container { padding: 1rem; margin-top: 1.5rem; }
     }
 </style>
@@ -220,7 +254,7 @@
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-lg-9 col-md-11">
-                <div class="question-outer-container">
+                <div class="question-outer-container" data-aos="fade-up">
                     <h1 class="page-title-pertanyaan">Diagnosa Penyakit ISPA</h1>
 
                     <div class="stepper">
@@ -262,9 +296,14 @@
                                     </div>
                                 </div>
                                 
-                                <button type="submit" class="btn btn-next-question">
-                                    Next <i class="fas fa-arrow-right ms-1"></i>
-                                </button>
+                                <div class="navigation-buttons-pertanyaan">
+                                    <a href="{{ route('diagnosa.biodata.form') }}" class="btn btn-nav-pertanyaan btn-prev">
+                                        <i class="fas fa-arrow-left me-1"></i> Sebelumnya
+                                    </a>
+                                    <button type="submit" class="btn btn-nav-pertanyaan btn-next">
+                                        Selanjutnya <i class="fas fa-arrow-right ms-1"></i>
+                                    </button>
+                                </div>
                             </form>
                         @else
                             <div class="alert alert-info p-4">
@@ -298,6 +337,5 @@
 
 @push('scripts')
 <script>
-
 </script>
 @endpush

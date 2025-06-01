@@ -69,7 +69,6 @@
         color: #555E6D;
         font-weight: 500;
     }
-
     .step.active .step-circle {
         background-color: #6C63FF;
         border-color: #6C63FF;
@@ -79,7 +78,6 @@
         color: #6C63FF;
         font-weight: 600;
     }
-
     .step:not(:last-child)::after {
         content: '';
         position: absolute;
@@ -90,13 +88,11 @@
         background-color: #E0E0E0;
         z-index: 1;
     }
-    .step.active:not(:last-child)::after {
+    .step.active:not(:last-child)::after,
+    .step.completed:not(:last-child)::after { 
         background-color: #6C63FF;
     }
-    .step.completed:not(:last-child)::after {
-        background-color: #6C63FF;
-    }
-    .step.completed .step-circle {
+    .step.completed .step-circle { 
         background-color: #6C63FF;
         border-color: #6C63FF;
         color: #FFFFFF;
@@ -105,18 +101,24 @@
         font-size: 0.9em;
     }
 
+
     .info-text p, .info-text ul li {
-        color: #333;
-        font-size: 1rem;
-        line-height: 1.7;
+        color: #374151; 
+        font-size: 1.05rem; 
+        line-height: 1.8;
     }
     .info-text ul {
-        padding-left: 20px;
-        margin-top: 0.5rem;
-        margin-bottom: 1.5rem;
+        padding-left: 25px;
+        margin-top: 0.75rem;
+        margin-bottom: 1.75rem;
     }
     .info-text ul li {
-        margin-bottom: 0.5rem;
+        margin-bottom: 0.6rem;
+        list-style-type: disc; 
+    }
+    .info-text p strong, .info-text p b { 
+        font-weight: 600;
+        color: #3B3A5E;
     }
 
     .warning-text {
@@ -124,39 +126,58 @@
         color: #5c2324;
         background-color: #fdecea;
         border-left: 5px solid #d9534f;
-        padding: 15px;
-        margin-top: 2rem;
-        border-radius: 4px;
+        padding: 1rem 1.25rem; 
+        margin-top: 2.5rem; 
+        border-radius: 8px; 
+        box-shadow: 0 2px 5px rgba(217, 83, 79, 0.1); 
     }
     .warning-text strong {
-        font-weight: 600;
+        font-weight: 700; 
         color: #c9302c;
     }
     .warning-text i.fas {
         color: #d9534f;
+        margin-right: 0.75rem; 
     }
 
-    .btn-next-custom {
+    .navigation-buttons { 
+        display: flex;
+        justify-content: space-between; 
+        align-items: center;
+        margin-top: 2.5rem;
+        padding-top: 1.5rem; 
+        border-top: 1px solid #e9ecef; 
+    }
+
+    .btn-nav-action { 
+        font-weight: 600;
+        font-size: 1.05rem; 
+        padding: 0.7rem 1.8rem; 
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    .btn-nav-action.btn-next {
         background-color: #6C63FF;
         border-color: #6C63FF;
         color: #FFFFFF;
-        font-weight: 600;
-        font-size: 1.1rem;
-        padding: 0.6rem 1.8rem;
-        border-radius: 50px;
-        transition: background-color 0.3s ease;
-        margin-top: 1.5rem;
-        display: inline-block;
     }
-    .btn-next-custom:hover {
+    .btn-nav-action.btn-next:hover {
         background-color: #5750d6;
         border-color: #5750d6;
+        transform: translateY(-2px);
+    }
+    .btn-nav-action.btn-prev { 
+        background-color: transparent;
+        border: 2px solid #6C63FF;
+        color: #6C63FF;
+    }
+    .btn-nav-action.btn-prev:hover {
+        background-color: #6C63FF;
         color: #FFFFFF;
+        transform: translateY(-2px);
     }
-    .button-container {
-        text-align: right;
-        margin-top: 1rem;
-    }
+
 
     @media (max-width: 767.98px) {
         .page-title-info {
@@ -164,22 +185,27 @@
             margin-bottom: 2rem;
         }
         .info-container {
-            padding: 20px 25px;
+            padding: 25px 20px; 
         }
         .stepper {
             max-width: 100%;
+            margin-bottom: 2rem;
         }
         .step-label {
             font-size: 0.75rem;
         }
-        .button-container {
-            text-align: center;
-        }
-        .btn-next-custom {
-            width: 100%;
-        }
         .info-text p, .info-text ul li {
             font-size: 0.95rem;
+        }
+        .navigation-buttons {
+            flex-direction: column-reverse; 
+            gap: 1rem; 
+            margin-top: 2rem;
+            padding-top: 1rem;
+        }
+        .btn-nav-action {
+            width: 100%;
+            text-align: center;
         }
     }
     @media (max-width: 400px) {
@@ -191,10 +217,11 @@
 @endpush
 
 @section('content')
-<main class="main-content-wrapper-info">
+{{-- Wrapper dengan class unik jika styling body/main di layout utama perlu di-override khusus untuk halaman ini --}}
+{{-- <main class="main-content-wrapper-info"> --}}
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-8 col-md-10">
+            <div class="col-lg-9 col-md-11 col-sm-12"> {{-- Kolom sedikit lebih lebar agar konten tidak terlalu sempit --}}
                 <div class="info-container">
                     <h1 class="page-title-info">Diagnosa Penyakit ISPA</h1>
 
@@ -216,21 +243,24 @@
                     <div class="info-text">
                         <p>Anda akan diminta mengisi form berisi beberapa pertanyaan terkait gejala yang sedang Anda rasakan.</p>
                         
-                        <p style="font-weight: 600; margin-top: 1.5rem;">Tes ini membantu Anda:</p>
+                        <p style="font-weight: 600; margin-top: 1.75rem;">Tes ini membantu Anda:</p>
                         <ul>
-                            <li>Mengenali apakah gejala yang Anda alami mengarah ke ISPA</li>
-                            <li>Mendapatkan hasil diagnosa awal berbasis sistem pakar</li>
-                            <li>Mendapatkan rekomendasi tindakan awal</li>
+                            <li><i ></i>Mengenali apakah gejala yang Anda alami mengarah ke ISPA</li>
+                            <li><i></i>Mendapatkan hasil diagnosa awal berbasis sistem pakar</li>
+                            <li><i></i>Mendapatkan rekomendasi tindakan awal</li>
                         </ul>
                     </div>
 
                     <div class="warning-text">
-                        <i class="fas fa-exclamation-triangle me-2"></i><strong>Penting:</strong> Tes ini bukan pengganti konsultasi medis langsung. Jika Anda mengalami gejala berat (seperti sesak napas berat, bibir membiru, kesadaran menurun), segera cari bantuan medis darurat. Hasil tes ini hanya memberikan informasi awal dan bukan keputusan final medis.
+                        <i class="fas fa-exclamation-triangle fa-lg me-2"></i><strong>Penting:</strong> Tes ini bukan pengganti konsultasi medis langsung. Jika Anda mengalami gejala berat (seperti sesak napas berat, bibir membiru, kesadaran menurun), segera cari bantuan medis darurat. Hasil tes ini hanya memberikan informasi awal dan bukan keputusan final medis.
                     </div>
                     
-                    <div class="button-container">
-                        <a href="{{ route('diagnosa.biodata.form') }}" class="btn btn-next-custom">
-                            Next <i class="fas fa-arrow-right ms-1"></i>
+                    <div class="navigation-buttons">
+                        <a href="{{ route('diagnosa.start') }}" class="btn btn-nav-action btn-prev">
+                            <i class="fas fa-arrow-left me-1"></i> Sebelumnya
+                        </a>
+                        <a href="{{ route('diagnosa.biodata.form') }}" class="btn btn-nav-action btn-next">
+                            Selanjutnya <i class="fas fa-arrow-right ms-1"></i>
                         </a>
                     </div>
 
@@ -238,5 +268,5 @@
             </div>
         </div>
     </div>
-</main>
+{{-- </main> --}}
 @endsection
