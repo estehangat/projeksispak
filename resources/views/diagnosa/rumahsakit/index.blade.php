@@ -90,7 +90,7 @@
         line-height: 1.6;
     }
     .rs-card .alamat-text {
-        min-height: 45px;
+        min-height: 45px; 
     }
     .rs-card .btn-detail {
         background-color: #6C63FF;
@@ -106,12 +106,6 @@
         background-color: #5750d6;
         border-color: #5750d6;
     }
-    .pagination .page-link { color: #6C63FF; }
-    .pagination .page-item.active .page-link {
-        background-color: #6C63FF;
-        border-color: #6C63FF;
-        color: white;
-    }
     .alert-custom-info {
         background-color: #e8e6ff;
         color: #4f4c77;
@@ -119,17 +113,20 @@
         padding: 1.5rem;
         border-radius: 8px;
     }
+
     .pagination {
-        font-size: 0;
         display: flex;
+        justify-content: center; 
         align-items: center;
         margin-top: 2rem;
+        list-style: none;
+        padding-left: 0; 
     }
 
     .pagination .page-item .page-link {
         color: #6C63FF;
         border-radius: 0.3rem;
-        margin: 0 3px;
+        margin: 0 3px; 
         font-size: 0.85rem;
         padding: 0.45rem 0.9rem;
         border: 1px solid #dee2e6;
@@ -138,12 +135,13 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: 36px;
+        min-height: 36px; 
         box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         transition: all 0.2s ease-in-out;
+        text-decoration: none; 
     }
 
-    .pagination .page-link:hover {
+    .pagination .page-item .page-link:hover {
         background-color: #e8e6ff;
         border-color: #c7c3ff;
         color: #5750d6;
@@ -166,15 +164,10 @@
         box-shadow: none;
     }
 
-    .pagination .page-item:first-child .page-link,
-    .pagination .page-item:last-child .page-link {
-        padding: 0.45rem 0.8rem;
-    }
-
     .pagination .page-item .page-link svg {
-        width: 0.7em;
-        height: 0.7em;
-        vertical-align: middle;
+        width: 0.7em; 
+        height: 0.7em; 
+        vertical-align: middle; 
     }
 </style>
 @endpush
@@ -195,7 +188,7 @@
                 <select name="provinsi_id" id="provinsi_id" class="form-select" onchange="this.form.submit()">
                     <option value="">Semua Provinsi</option>
                     @foreach($provinsis as $provinsi)
-                        <option value="{{ $provinsi->id }}" {{ (string)$selectedProvinsiId == (string)$provinsi->id ? 'selected' : '' }}>
+                        <option value="{{ $provinsi->id }}" {{ (isset($selectedProvinsiId) && (string)$selectedProvinsiId == (string)$provinsi->id) ? 'selected' : '' }}>
                             {{ $provinsi->nama_provinsi }}
                         </option>
                     @endforeach
@@ -203,25 +196,25 @@
             </div>
             <div class="col-md-5">
                 <label for="kabupaten_id" class="form-label">Filter Kabupaten/Kota:</label>
-                <select name="kabupaten_id" id="kabupaten_id" class="form-select" {{ $kabupatens->isEmpty() && !$selectedProvinsiId ? 'disabled' : '' }}>
-                    <option value="">Semua Kabupaten/Kota @if($selectedProvinsiId) (di provinsi terpilih) @endif</option>
-                    @if($kabupatens->isNotEmpty())
+                <select name="kabupaten_id" id="kabupaten_id" class="form-select" {{ (!isset($selectedProvinsiId) || $kabupatens->isEmpty()) ? 'disabled' : '' }} onchange="this.form.submit()">
+                    <option value="">Semua Kabupaten/Kota @if(isset($selectedProvinsiId) && $selectedProvinsiId) (di provinsi terpilih) @endif</option>
+                    @if(isset($kabupatens) && $kabupatens->isNotEmpty())
                         @foreach($kabupatens as $kabupaten)
-                            <option value="{{ $kabupaten->id }}" {{ (string)$selectedKabupatenId == (string)$kabupaten->id ? 'selected' : '' }}>
+                            <option value="{{ $kabupaten->id }}" {{ (isset($selectedKabupatenId) && (string)$selectedKabupatenId == (string)$kabupaten->id) ? 'selected' : '' }}>
                                 {{ $kabupaten->nama_kabupaten }}
                             </option>
                         @endforeach
-                    @elseif($selectedProvinsiId)
+                    @elseif(isset($selectedProvinsiId) && $selectedProvinsiId)
                         <option value="" disabled>Tidak ada data kabupaten untuk provinsi ini</option>
                     @endif
                 </select>
             </div>
-            <div class="col-md-2">
+            <div class="col-md-2 d-flex align-items-end"> {{-- Penyesuaian agar tombol sejajar --}}
                 <button type="submit" class="btn btn-primary w-100"><i class="fas fa-filter me-2"></i>Filter</button>
             </div>
         </form>
 
-        @if($rumahSakits->isEmpty())
+        @if(!isset($rumahSakits) || $rumahSakits->isEmpty())
             <div class="alert alert-custom-info text-center py-4" role="alert">
                 <h4><i class="fas fa-info-circle me-2"></i> Informasi</h4>
                 <p class="mb-0">Belum ada data fasilitas kesehatan untuk filter yang Anda pilih, atau data masih kosong.</p>
@@ -251,7 +244,14 @@
                 </div>
                 @endforeach
             </div>
+
+            {{-- PAGINATION SECTION --}}
+            @if ($rumahSakits->hasPages())
+            <div class="pagination-container mt-4"> {{-- Menggunakan class .pagination dari CSS untuk pemusatan --}}
+                {{ $rumahSakits->appends(request()->query())->links() }}
+            </div>
+            @endif
+            {{-- END PAGINATION SECTION --}}
+
         @endif
-    </div>
-</div>
-@endsection
+    </div> </div> @endsection

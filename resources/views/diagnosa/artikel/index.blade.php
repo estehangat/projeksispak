@@ -150,6 +150,10 @@
         padding: 1.5rem;
         border-radius: 8px;
     }
+    .pagination svg.h-5.w-5 { 
+    width: 1.25rem;  
+    height: 1.25rem; 
+}
 </style>
 @endpush
 

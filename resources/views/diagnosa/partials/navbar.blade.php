@@ -1,5 +1,4 @@
-<nav class="navbar navbar-expand-lg navbar-custom sticky-top">
-    <div class="container">
+<nav class="navbar navbar-expand-lg navbar-custom navbar-light sticky-top">    <div class="container">
         <a class="navbar-brand navbar-brand-custom d-flex align-items-center" href="{{ route('diagnosa.start') }}">
             <img src="{{ asset('logo-ispa.png') }}" alt="Logo Sistem Pakar ISPA" style="height: 30px; margin-right: 10px;">
             <span>Sistem Pakar <strong style="color: #6C63FF;">ISPA</strong></span>
@@ -30,8 +29,7 @@
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="btn btn-login-custom" href="{{ route('admin.login') }}">
-                        <i class="fas fa-sign-in-alt me-1"></i> Login Admin
+                    <a class="btn btn-nav-outline" href="{{ route('admin.login') }}">  <i class="fas fa-sign-in-alt me-1"></i> Login Admin
                     </a>
                 </li>
             </ul>
