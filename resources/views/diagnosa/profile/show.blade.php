@@ -192,10 +192,17 @@
                                  </span>
                             </div>
                         </div>
-                    </div>
+                    </div> <br> <br>
 
                     <div class="mt-4 pt-3 text-center border-top">
-                        <p class="text-muted small mt-2">Jika Anda ingin mengubah data profil atau password, fitur tersebut akan segera tersedia.</p>
+                        <form method="POST" action="{{ route('admin.logout') }}" id="logout-form-profile" class="d-inline">
+                            @csrf
+                            <a class="btn btn-danger" href="{{ route('admin.logout') }}"
+                            onclick="event.preventDefault(); document.getElementById('logout-form-profile').submit();">
+                                <i class="fas fa-sign-out-alt me-1"></i> Logout dari Akun
+                            </a>
+                        </form>
+                        <p class="text-muted small mt-3">Jika Anda ingin mengubah data profil atau password, fitur tersebut akan segera tersedia.</p>
                     </div>
 
                 </div>

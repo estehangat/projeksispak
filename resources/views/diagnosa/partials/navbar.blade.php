@@ -32,6 +32,15 @@
                         <i class="fas fa-user-circle me-1"></i> Profil Akun
                     </a>
                 </li>  
+                <li class="nav-item">
+                <form method="POST" action="{{ route('admin.logout') }}" id="logout-form">
+                    @csrf
+                    <a class="btn btn-nav-outline" href="{{ route('admin.logout') }}"
+                       onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        <i class="fas fa-sign-out-alt me-1"></i> Logout
+                    </a>
+                </form>
+            </li>
             </ul>
         </div>
     </div>
