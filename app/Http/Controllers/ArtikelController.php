@@ -24,8 +24,8 @@ class ArtikelController extends Controller
             $artikelsQuery->where('judul', 'LIKE', '%' . $searchQuery . '%');
         }
 
-        $artikels = $artikelsQuery->orderBy('published_at', 'desc')
-                                ->orderBy('updated_at', 'desc')  
+        $artikels = $artikelsQuery->orderBy('updated_at', 'desc')
+                                ->orderBy('created_at', 'desc')  
                                 ->paginate($perPage) 
                                 ->appends($request->query()); 
 
