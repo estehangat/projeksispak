@@ -10,6 +10,7 @@ use App\Http\Controllers\PenyakitController;
 use App\Http\Controllers\RumahSakitController;
 use App\Http\Controllers\DiagnosaIspaController;
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\HasilDiagnosaController;
 use App\Http\Controllers\PakarDashboardController;
 
 Route::get('/test-kabupatens/{provinsi_id}', function ($provinsi_id) {
@@ -108,6 +109,11 @@ Route::group(['middleware' => 'auth'], function () {
             ->name('feedback');
         Route::delete('/feedback/{id}', [FeedbackController::class, 'destroy'])
             ->name('feedback.destroy');
+
+        Route::get('/hasil', [HasilDiagnosaController::class, 'index'])
+            ->name('hasil');
+        Route::delete('/hasil/{id}', [HasilDiagnosaController::class, 'destroy'])
+            ->name('hasil.destroy');
     });
 
     Route::prefix('pakar')->name('pakar.')->group(function () {
