@@ -28,6 +28,10 @@
                         <i class="fas fa-comment-dots me-1"></i> Feedback
                     </a>
                 </li>
+                <li class="nav-item me-2"> <a class="btn btn-nav-outline @if(Route::currentRouteName() == 'user.profile') active @endif" href="{{ route('user.profile') }}">
+                        <i class="fas fa-user-circle me-1"></i> Profil Akun
+                    </a>
+                </li>  
             </ul>
         </div>
     </div>

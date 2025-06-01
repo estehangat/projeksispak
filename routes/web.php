@@ -11,6 +11,7 @@ use App\Http\Controllers\RumahSakitController;
 use App\Http\Controllers\DiagnosaIspaController;
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\PakarDashboardController;
+use App\Http\Controllers\UserProfileController;
 
 Route::get('/test-kabupatens/{provinsi_id}', function ($provinsi_id) {
     $kabupatens = App\Models\Kabupaten::where('provinsi_id', $provinsi_id)
@@ -53,6 +54,8 @@ Route::group(['middleware' => 'auth'], function () {
         Route::get('/fasilitas-kesehatan/{rumahSakit}', [RumahSakitController::class, 'show'])->name('rumahsakit.show');
 
         Route::get('/artikel-kesehatan', [ArtikelController::class, 'index'])->name('artikel.index');
+
+        Route::get('/profil-akun', [UserProfileController::class, 'show'])->name('user.profile');
     });
 
     Route::prefix('admin')->name('admin.')->group(function () {

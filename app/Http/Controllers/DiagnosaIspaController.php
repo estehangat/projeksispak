@@ -9,6 +9,7 @@ use App\Models\Gejala;
 use App\Models\Penyakit;
 use App\Models\RumahSakit; 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator; 
 
@@ -40,7 +41,22 @@ class DiagnosaIspaController extends Controller
 
     public function showBiodataForm()
     {
-        return view('diagnosa.biodata');
+        $namaTerisiOtomatis = null;
+        $usiaDariSesi = null; 
+
+        $biodataSesi = Session::get('biodata');
+        if ($biodataSesi && isset($biodataSesi['nama'])) {
+            $namaTerisiOtomatis = $biodataSesi['nama'];
+        }
+        if ($biodataSesi && isset($biodataSesi['usia'])) {
+            $usiaDariSesi = $biodataSesi['usia'];
+        }
+
+        if (is_null($namaTerisiOtomatis) && Auth::check()) {
+            $namaTerisiOtomatis = Auth::user()->name;
+        }
+
+        return view('diagnosa.biodata', compact('namaTerisiOtomatis', 'usiaDariSesi'));
     }
 
     public function submitBiodataAndStart(Request $request)
@@ -64,7 +80,7 @@ class DiagnosaIspaController extends Controller
                 ->with('error', 'Sistem pakar belum siap atau aturan awal tidak valid.');
         }
 
-        Session::put('kode_gejala_sekarang', $aturanAwal->id_gejala_sekarang); 
+        Session::put('kode_gejala_sekarang', $aturanAwal->id_gejala_sekarang);
         return redirect()->route('diagnosa.pertanyaan');
     }
 
