@@ -13,35 +13,35 @@ class ArtikelController extends Controller
         $searchQuery = $request->input('search_judul');
 
         $validPerPages = [9, 15, 25, 50];
-        $perPage = $request->input('per_page', $validPerPages[0]);
-        if (!in_array((int)$perPage, $validPerPages)) {
-            $perPage = $validPerPages[0];
-        }
+        $perPageInput = $request->input('per_page', $validPerPages[0]);
+        
+        $perPage = in_array((int)$perPageInput, $validPerPages, true) ? (int)$perPageInput : $validPerPages[0];
 
         $artikelsQuery = Artikel::where('status', 'published')
-            ->whereNotNull('published_at');
+                            ->whereNotNull('published_at');
 
         if ($searchQuery) {
             $artikelsQuery->where('judul', 'LIKE', '%' . $searchQuery . '%');
         }
 
         $artikels = $artikelsQuery->orderBy('published_at', 'desc')
-            ->paginate((int)$perPage)
-            ->appends($request->query());
+                                ->orderBy('updated_at', 'desc')  
+                                ->paginate($perPage) 
+                                ->appends($request->query()); 
 
         return view('diagnosa.artikel.index', compact(
             'artikels',
             'searchQuery',
-            'perPage'
+            'perPage' 
         ));
     }
 
     /**
-     * Display a listing of all articles.
+     * Display a listing of all articles for admin.
      *
      * @return \Illuminate\Http\Response
      */
-    public function adminIndex()
+    public function adminIndex() // Diambil dari kode teman Anda
     {
         $artikels = Artikel::orderBy('created_at', 'desc')->get();
         return view('admin.artikel.index', compact('artikels'));
@@ -53,7 +53,7 @@ class ArtikelController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request) // Diambil dari kode teman Anda
     {
         $validator = Validator::make($request->all(), [
             'judul' => 'required|string|max:255',
@@ -66,20 +66,21 @@ class ArtikelController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->route('admin.artikel')
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->route('admin.artikel') // Pastikan route 'admin.artikel' ada
+                        ->withErrors($validator)
+                        ->withInput();
         }
 
         // If published but no date provided, use current date
-        if ($request->status == 'published' && empty($request->published_at)) {
+        // Menggunakan $request->input('status') untuk konsistensi, meskipun $request->status juga bisa
+        if ($request->input('status') == 'published' && empty($request->input('published_at'))) {
             $request->merge(['published_at' => now()]);
         }
 
         Artikel::create($request->all());
 
-        return redirect()->route('admin.artikel')
-            ->with('success', 'Artikel berhasil ditambahkan.');
+        return redirect()->route('admin.artikel') 
+                        ->with('success', 'Artikel berhasil ditambahkan.');
     }
 
     /**
@@ -89,7 +90,7 @@ class ArtikelController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id) // Diambil dari kode teman Anda
     {
         $validator = Validator::make($request->all(), [
             'judul' => 'required|string|max:255',
@@ -102,22 +103,23 @@ class ArtikelController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return redirect()->route('admin.artikel')
-                ->withErrors($validator)
-                ->withInput();
+            return redirect()->route('admin.artikel') // Pastikan route 'admin.artikel' ada
+                        ->withErrors($validator)
+                        ->withInput();
         }
 
         $artikel = Artikel::findOrFail($id);
 
         // If published but no date provided, use current date
-        if ($request->status == 'published' && empty($request->published_at)) {
+        // Menggunakan $request->input('status') untuk konsistensi
+        if ($request->input('status') == 'published' && empty($request->input('published_at'))) {
             $request->merge(['published_at' => now()]);
         }
 
         $artikel->update($request->all());
 
-        return redirect()->route('admin.artikel')
-            ->with('success', 'Artikel berhasil diperbarui.');
+        return redirect()->route('admin.artikel') // Pastikan route 'admin.artikel' ada
+                        ->with('success', 'Artikel berhasil diperbarui.');
     }
 
     /**
@@ -126,15 +128,16 @@ class ArtikelController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id) // Diambil dari kode teman Anda
     {
         $artikel = Artikel::findOrFail($id);
         $artikel->delete();
 
-        return redirect()->route('admin.artikel')
-            ->with('success', 'Artikel berhasil dihapus.');
+        return redirect()->route('admin.artikel') // Pastikan route 'admin.artikel' ada
+                        ->with('success', 'Artikel berhasil dihapus.');
     }
 
+    // Komentar method show dari kode teman Anda juga dipertahankan jika memang belum akan digunakan
     // public function show(Artikel $artikel)
     // {
     //     // if ($artikel->status !== 'published' || is_null($artikel->published_at)) {
