@@ -4,6 +4,7 @@
     <div class="sidebar-section">Pengetahuan</div>
     <a href="{{ route('pakar.gejala') }}" class="sidebar-item">Gejala</a>
     <a href="{{ route('pakar.penyakit') }}" class="sidebar-item">Penyakit</a>
+    <a href="{{ route('pakar.aturan') }}" class="sidebar-item">Aturan</a>
 
     <div class="sidebar-section">Pengaturan</div>
     <!-- Ganti form logout dengan tombol yang memicu modal -->

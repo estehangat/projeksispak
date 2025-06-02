@@ -153,5 +153,14 @@ Route::group(['middleware' => 'auth'], function () {
             ->name('gejala.update');
         Route::delete('/gejala/{id}', [PakarDashboardController::class, 'gejalaDestroy'])
             ->name('gejala.destroy');
+
+        Route::get('/aturan', [PakarDashboardController::class, 'aturanIndex'])
+            ->name('aturan');
+        Route::post('/aturan', [PakarDashboardController::class, 'aturanStore'])
+            ->name('aturan.store');
+        Route::put('/aturan/{id}', [PakarDashboardController::class, 'aturanUpdate'])
+            ->name('aturan.update');
+        Route::delete('/aturan/{id}', [PakarDashboardController::class, 'aturanDestroy'])
+            ->name('aturan.destroy');
     });
 });
