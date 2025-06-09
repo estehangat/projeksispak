@@ -1,473 +1,496 @@
-@extends('layouts.pakar')
+@extends('layouts.admin')
 
 @section('title', 'Data Aturan ISPA')
-
-@section('page-title', 'Aturan ISPA')
-
-@section('content')
-    <div class="main-content">
-        <div class="container background-white p-5 rounded-4 shadow-sm">
-            <h1 class="mb-4 fw-bold">Daftar Aturan ISPA</h1>
-
-            <!-- Table -->
-            <a href="#" class="btn btn-outline-success mb-3 rounded-pill" data-bs-toggle="modal"
-                data-bs-target="#addAturanModal">
-                <i class="bi bi-plus-circle"></i> Tambah Aturan
-            </a>
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr class="table-header">
-                            <th style="width: 50px;">#</th>
-                            <th style="width: 150px;">GEJALA SEKARANG</th>
-                            <th style="width: 150px;">JAWABAN</th>
-                            <th style="width: 150px;">GEJALA SELANJUTNYA</th>
-                            <th style="width: 150px;">HASIL PENYAKIT</th>
-                            <th style="width: 100px;">AWAL</th>
-                            <th style="width: 100px">AKSI</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach ($aturans as $aturan)
-                            <tr>
-                                <td class="text-left">{{ $loop->iteration }}</td>
-                                <td class="text-left">{{ $aturan->gejalaSekarang ? $aturan->gejalaSekarang->gejala : '-' }}
-                                </td>
-                                <td class="text-left">{{ $aturan->jawaban }}</td>
-                                <td class="text-left">
-                                    {{ $aturan->gejalaSelanjutnya ? $aturan->gejalaSelanjutnya->gejala : '-' }}</td>
-                                <td class="text-left">{{ $aturan->penyakitHasil ? $aturan->penyakitHasil->penyakit : '-' }}
-                                </td>
-                                <td class="text-center">
-                                    @if ($aturan->is_pertanyaan_awal)
-                                        <span class="badge bg-success">Ya</span>
-                                    @else
-                                        <span class="badge bg-secondary">Tidak</span>
-                                    @endif
-                                </td>
-                                <td class="text-left">
-                                    <div class="d-flex gap-2">
-                                        <button class="btn btn-sm btn-warning" title="Edit" data-bs-toggle="modal"
-                                            data-bs-target="#editAturanModal{{ $aturan->id }}">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </button>
-                                        <button class="btn btn-sm btn-danger" title="Hapus" data-bs-toggle="modal"
-                                            data-bs-target="#deleteAturanModal{{ $aturan->id }}">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Aturan Modal -->
-    <div class="modal fade" id="addAturanModal" tabindex="-1" aria-labelledby="addAturanModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content custom-modal">
-                <div class="modal-header custom-modal-header">
-                    <h5 class="modal-title fw-bold" id="addAturanModalLabel">Tambah Aturan ISPA</h5>
-                </div>
-                <form action="{{ route('pakar.aturan.store') }}" method="POST">
-                    @csrf
-                    <div class="modal-body custom-modal-body">
-                        <div class="mb-4">
-
-                            <!-- Hasil Penyakit for when there are no branches -->
-                            <div class="mb-4" id="common-disease-result">
-                                <label for="id_penyakit_hasil" class="form-label">Hasil Penyakit</label>
-                                <select id="id_penyakit_hasil" name="id_penyakit_hasil" class="form-select">
-                                    <option value="">Pilih Penyakit</option>
-                                    @foreach ($penyakits as $penyakit)
-                                        <option value="{{ $penyakit->kode_penyakit }}">{{ $penyakit->penyakit }}</option>
-                                    @endforeach
-                                </select>
-                                <small class="form-text text-muted">Pilih penyakit jika merupakan hasil akhir dari
-                                    percabangan</small>
-                            </div>
-
-                            <!-- Decision branches container -->
-                            <div id="branches-container">
-                                <!-- Initial branch group -->
-                                <div class="branch-group mb-4 p-3 border rounded">
-                                    <h6 class="mb-3 fw-bold">Percabangan 1</h6>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Gejala Sekarang</label>
-                                        <select name="branches[0][id_gejala_sekarang]" class="form-select gejala-sekarang"
-                                            required>
-                                            <option value="">Pilih Gejala</option>
-                                            @foreach ($gejalas as $gejala)
-                                                <option value="{{ $gejala->kode_gejala }}">{{ $gejala->gejala }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Jawaban</label>
-                                        <select name="branches[0][jawaban]" class="form-select" required>
-                                            <option value="Ya">Ya</option>
-                                            <option value="Tidak">Tidak</option>
-                                        </select>
-                                    </div>
-
-                                    <div class="mb-3">
-                                        <label class="form-label">Gejala Selanjutnya</label>
-                                        <select name="branches[0][id_gejala_selanjutnya]" class="form-select">
-                                            <option value="">Pilih Gejala</option>
-                                            @foreach ($gejalas as $gejala)
-                                                <option value="{{ $gejala->kode_gejala }}">{{ $gejala->gejala }}</option>
-                                            @endforeach
-                                        </select>
-                                        <small class="form-text text-muted">Biarkan kosong jika merupakan hasil
-                                            akhir</small>
-                                    </div>
-
-                                    <!-- Disease result for branch -->
-                                    <div class="mb-3 branch-disease-result">
-                                        <label class="form-label">Hasil Penyakit</label>
-                                        <select name="branches[0][id_penyakit_hasil]" class="form-select">
-                                            <option value="">Pilih Penyakit</option>
-                                            @foreach ($penyakits as $penyakit)
-                                                <option value="{{ $penyakit->kode_penyakit }}">{{ $penyakit->penyakit }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        <small class="form-text text-muted">Pilih jika merupakan hasil akhir dari
-                                            percabangan</small>
-                                    </div>
-
-                                    <button type="button" class="btn btn-sm btn-outline-danger remove-branch"
-                                        style="display:none;">
-                                        <i class="bi bi-trash"></i> Hapus Percabangan
-                                    </button>
-                                </div>
-                            </div>
-
-                            <button type="button" id="add-branch" class="btn btn-outline-primary">
-                                <i class="bi bi-plus-circle"></i> Tambah Percabangan
-                            </button>
-                        </div>
-                    </div>
-                    <div class="modal-footer custom-modal-footer">
-                        <button type="submit" class="btn btn-primary">Simpan</button>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Edit & Delete Modals for each Aturan -->
-    @foreach ($aturans as $aturan)
-        <!-- Edit Aturan Modal -->
-        <div class="modal fade" id="editAturanModal{{ $aturan->id }}" tabindex="-1"
-            aria-labelledby="editAturanModalLabel{{ $aturan->id }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-                <div class="modal-content custom-modal">
-                    <div class="modal-header custom-modal-header">
-                        <h5 class="modal-title fw-bold" id="editAturanModalLabel{{ $aturan->id }}">Edit Aturan ISPA
-                        </h5>
-                    </div>
-                    <form action="{{ route('pakar.aturan.update', $aturan->id) }}" method="POST">
-                        @csrf
-                        @method('PUT')
-                        <div class="modal-body custom-modal-body">
-                            <div class="mb-4">
-
-                                <div class="mb-3">
-                                    <label for="id_gejala_sekarang_{{ $aturan->id }}" class="form-label">Gejala
-                                        Sekarang</label>
-                                    <select id="id_gejala_sekarang_{{ $aturan->id }}" name="id_gejala_sekarang"
-                                        class="form-select" required>
-                                        <option value="">Pilih Gejala</option>
-                                        @foreach ($gejalas as $gejala)
-                                            <option value="{{ $gejala->kode_gejala }}"
-                                                {{ $aturan->id_gejala_sekarang == $gejala->kode_gejala ? 'selected' : '' }}>
-                                                {{ $gejala->gejala }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="jawaban_{{ $aturan->id }}" class="form-label">Jawaban</label>
-                                    <select id="jawaban_{{ $aturan->id }}" name="jawaban" class="form-select"
-                                        required>
-                                        @if ($aturan->jawaban == 'Ya')
-                                            <option value="Ya" selected>Ya</option>
-                                            <option value="Tidak">Tidak</option>
-                                        @else
-                                            <option value="Ya">Ya</option>
-                                            <option value="Tidak" selected>Tidak</option>
-                                        @endif
-                                    </select>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="id_gejala_selanjutnya_{{ $aturan->id }}" class="form-label">Gejala
-                                        Selanjutnya</label>
-                                    <select id="id_gejala_selanjutnya_{{ $aturan->id }}" name="id_gejala_selanjutnya"
-                                        class="form-select">
-                                        <option value="">Pilih Gejala</option>
-                                        @foreach ($gejalas as $gejala)
-                                            <option value="{{ $gejala->kode_gejala }}"
-                                                {{ $aturan->id_gejala_selanjutnya == $gejala->kode_gejala ? 'selected' : '' }}>
-                                                {{ $gejala->gejala }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <small class="form-text text-muted">Biarkan kosong jika merupakan hasil akhir</small>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label for="id_penyakit_hasil_{{ $aturan->id }}" class="form-label">Hasil
-                                        Penyakit</label>
-                                    <select id="id_penyakit_hasil_{{ $aturan->id }}" name="id_penyakit_hasil"
-                                        class="form-select">
-                                        <option value="">Pilih Penyakit</option>
-                                        @foreach ($penyakits as $penyakit)
-                                            <option value="{{ $penyakit->kode_penyakit }}"
-                                                {{ $aturan->id_penyakit_hasil == $penyakit->kode_penyakit ? 'selected' : '' }}>
-                                                {{ $penyakit->penyakit }}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                    <small class="form-text text-muted">Biarkan kosong jika bukan hasil akhir</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="modal-footer custom-modal-footer">
-                            <button type="submit" class="btn btn-primary">Simpan</button>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- Delete Aturan Modal -->
-        <div class="modal fade" id="deleteAturanModal{{ $aturan->id }}" tabindex="-1"
-            aria-labelledby="deleteAturanModalLabel{{ $aturan->id }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content custom-modal">
-                    <div class="modal-header custom-modal-header">
-                        <h5 class="modal-title fw-bold" id="deleteAturanModalLabel{{ $aturan->id }}">Konfirmasi Hapus
-                        </h5>
-                    </div>
-                    <div class="modal-body custom-modal-body">
-                        <p>Apakah Anda yakin ingin menghapus aturan ini?</p>
-                        <p><strong>Gejala Sekarang:</strong>
-                            {{ $aturan->gejalaSekarang ? $aturan->gejalaSekarang->gejala : '-' }}</p>
-                        <p><strong>Jawaban:</strong> {{ $aturan->jawaban }}</p>
-                        <p><strong>Gejala Selanjutnya:</strong>
-                            {{ $aturan->gejalaSelanjutnya ? $aturan->gejalaSelanjutnya->gejala : '-' }}</p>
-                    </div>
-                    <div class="modal-footer custom-modal-footer">
-                        <form action="{{ route('pakar.aturan.destroy', $aturan->id) }}" method="POST"
-                            style="display: inline;">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger">Hapus</button>
-                        </form>
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endforeach
-@endsection
+@section('page-title', 'Kelola Aturan Pohon Keputusan')
 
 @push('styles')
-    <style>
-        .main-content {
-            margin-left: 250px;
-            padding: 3rem;
-        }
-
-        .background-white {
-            background-color: #ffffff;
-        }
-
-        .card-body {
-            background-color: #E1E2ED;
-        }
-
-        /* Custom Modal Styles */
-        .custom-modal {
-            border-radius: 10px;
-            border: none;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .custom-modal-header {
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
-            border-radius: 10px 10px 0 0;
-            padding: 20px 25px 15px 25px;
-            position: relative;
-        }
-
-        .custom-modal-header .modal-title {
-            color: #333;
-            font-size: 18px;
-            margin: 0;
-        }
-
-        .custom-modal-body {
-            padding: 25px;
-            background-color: #fff;
-        }
-
-        .custom-input {
-            border: 2px solid #e9ecef;
-            border-radius: 8px;
-            padding: 12px 15px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            background-color: #f8f9fa;
-        }
-
-        .custom-input:focus {
-            border-color: #007bff;
-            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-            background-color: #fff;
-        }
-
-        .custom-modal-footer {
-            background-color: #f8f9fa;
-            border-top: 1px solid #e9ecef;
-            border-radius: 0 0 10px 10px;
-            padding: 15px 25px 20px 25px;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-        }
-    </style>
+<style>
+    .table th, .table td {
+        vertical-align: middle;
+    }
+    .action-buttons .btn {
+        margin-right: 5px;
+    }
+    .badge-ya {
+        background-color: #28a745;
+        color: white;
+    }
+    .badge-tidak {
+        background-color: #dc3545;
+        color: white;
+    }
+    .form-section {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid #eee;
+    }
+    .form-section:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    .main-content {
+        margin-left: 250px;
+        padding: 2rem;
+    }
+    .background-white {
+        background-color: #ffffff;
+    }
+    .custom-modal .modal-content {
+        border-radius: 10px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+    .custom-modal-header {
+        background-color: #f8f9fa;
+        border-bottom: 1px solid #e9ecef;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        padding: 1rem 1.5rem;
+    }
+    .custom-modal-header .modal-title {
+        color: #333;
+        font-size: 1.15rem;
+        font-weight: 600;
+    }
+    .custom-modal-body {
+        padding: 1.5rem;
+        background-color: #fff;
+    }
+    .custom-modal-footer {
+        background-color: #f8f9fa;
+        border-top: 1px solid #e9ecef;
+        border-bottom-left-radius: 10px;
+        border-bottom-right-radius: 10px;
+        padding: 1rem 1.5rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.5rem;
+    }
+    .custom-input, .form-select {
+        border: 1px solid #ced4da;
+        border-radius: 0.25rem;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.9rem;
+    }
+    .custom-input:focus, .form-select:focus {
+        border-color: #6C63FF;
+        box-shadow: 0 0 0 0.2rem rgba(108, 99, 255, 0.25);
+    }
+</style>
 @endpush
 
-@push('scripts')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Counter for branch groups
-            let branchCounter = 1;
+@section('content')
+<div class="main-content">
+    <div class="container-fluid background-white p-4 p-md-5 rounded-4 shadow-sm">
+        <h1 class="mb-4 fw-bold">Daftar Aturan Diagnosa ISPA</h1>
 
-            // Function to update disease result visibility
-            function updateDiseaseResultVisibility() {
-                // Hide the common disease result selection when there are branches
-                const commonDiseaseResult = document.getElementById('common-disease-result');
-                if (commonDiseaseResult) {
-                    commonDiseaseResult.style.display = document.querySelectorAll('.branch-group').length > 0 ?
-                        'none' : 'block';
-                }
+        <a href="#" class="btn btn-success mb-3 rounded-pill" data-bs-toggle="modal" data-bs-target="#addAturanModal">
+            <i class="fas fa-plus-circle me-1"></i> Tambah Aturan Baru
+        </a>
 
-                // Show disease result only in the last branch
-                document.querySelectorAll('.branch-disease-result').forEach(container => {
-                    container.style.display = 'none';
-                });
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
 
-                const branches = document.querySelectorAll('.branch-group');
-                if (branches.length > 0) {
-                    const lastBranch = branches[branches.length - 1];
-                    lastBranch.querySelector('.branch-disease-result').style.display = 'block';
-                }
-            }
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 50px;">#</th>
+                        <th>Gejala Sekarang (Kode - Pertanyaan)</th>
+                        <th>Jika Jawaban</th>
+                        <th>Gejala Selanjutnya (Kode - Pertanyaan)</th>
+                        <th>Penyakit Hasil (Kode - Nama)</th>
+                        <th class="text-center">Awal?</th>
+                        <th style="width: 12%;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($aturans as $aturan)
+                    <tr>
+                        <td>{{ $loop->iteration }}</td>
+                        <td>
+                            {{ $aturan->id_gejala_sekarang }} <br>
+                            <small class="text-muted">({{ $aturan->gejalaSekarangRel ? $aturan->gejalaSekarangRel->gejala : 'N/A' }})</small>
+                        </td>
+                        <td>
+                            @if($aturan->jawaban == 'YA')
+                                <span class="badge badge-ya p-2">{{ $aturan->jawaban }}</span>
+                            @elseif($aturan->jawaban == 'TIDAK')
+                                <span class="badge badge-tidak p-2">{{ $aturan->jawaban }}</span>
+                            @else
+                                {{ $aturan->jawaban }}
+                            @endif
+                        </td>
+                        <td>
+                            @if($aturan->id_gejala_selanjutnya)
+                                {{ $aturan->id_gejala_selanjutnya }} <br>
+                                <small class="text-muted">({{ $aturan->gejalaSelanjutnyaRel ? $aturan->gejalaSelanjutnyaRel->gejala : 'N/A' }})</small>
+                            @else
+                                -
+                            @endif
+                        </td>
+                        <td>
+                            @if($aturan->id_penyakit_hasil)
+                                {{ $aturan->id_penyakit_hasil }} <br>
+                                <small class="text-muted">({{ $aturan->penyakitHasilRel ? $aturan->penyakitHasilRel->penyakit : 'N/A' }})</small>
+                            @else
+                                -
+                            @endif
+                        </td>
+                        <td class="text-center">
+                            @if ($aturan->is_pertanyaan_awal)
+                                <span class="badge bg-success">Ya</span>
+                            @else
+                                <span class="badge bg-secondary">Tidak</span>
+                            @endif
+                        </td>
+                        <td class="action-buttons">
+                            <button class="btn btn-sm btn-warning" title="Edit" data-bs-toggle="modal" data-bs-target="#editAturanModal{{ $aturan->id }}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger" title="Hapus" data-bs-toggle="modal" data-bs-target="#deleteAturanModal{{ $aturan->id }}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="8" class="text-center">Belum ada data aturan. Silakan tambahkan aturan baru.</td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-3">
+        </div>
+    </div>
+</div>
 
-            // Add branch button functionality
-            document.getElementById('add-branch').addEventListener('click', function() {
-                const branchesContainer = document.getElementById('branches-container');
-                const newBranch = document.createElement('div');
-                newBranch.className = 'branch-group mb-4 p-3 border rounded';
+<div class="modal fade" id="addAturanModal" tabindex="-1" aria-labelledby="addAturanModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content custom-modal">
+            <div class="modal-header custom-modal-header">
+                <h5 class="modal-title fw-bold" id="addAturanModalLabel">Tambah Aturan ISPA Baru</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('admin.aturan.store') }}" method="POST">
+                @csrf
+                <div class="modal-body custom-modal-body">
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="is_pertanyaan_awal_checkbox_add" name="is_pertanyaan_awal_checkbox" value="1" {{ old('is_pertanyaan_awal_checkbox') ? 'checked' : '' }}>
+                        <label class="form-check-label" for="is_pertanyaan_awal_checkbox_add">Apakah ini Pertanyaan Awal (Akar Pohon)?</label>
+                    </div>
 
-                newBranch.innerHTML = `
-                    <h6 class="mb-3 fw-bold">Percabangan ${branchCounter + 1}</h6>
-                    
+                    <div id="parent-rule-selection-add" class="mb-3" style="{{ old('is_pertanyaan_awal_checkbox') ? 'display:none;' : 'display:block;' }}">
+                        <div class="mb-3">
+                            <label for="id_gejala_induk_kontekstual_add" class="form-label">Merupakan Anak dari Gejala Induk (Pilih Gejala Kontekstual yang Sudah Ada):</label>
+                            <select id="id_gejala_induk_kontekstual_add" name="id_gejala_induk_kontekstual" class="form-select">
+                                <option value="">Pilih Gejala Induk Jika Bukan Pertanyaan Awal</option>
+                                @foreach ($gejalaIndukPotensial as $gejala_induk)
+                                    <option value="{{ $gejala_induk->kode_gejala }}" {{ old('id_gejala_induk_kontekstual') == $gejala_induk->kode_gejala ? 'selected' : '' }}>
+                                        {{ $gejala_induk->kode_gejala }} - {{ $gejala_induk->gejala }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <small class="form-text text-muted">Pilih dari gejala yang sudah terdaftar di aturan dan tidak mengarah ke penyakit.</small>
+                        </div>
+                        <div class="mb-3">
+                            <label for="jawaban_induk_add" class="form-label">Dengan Jawaban dari Gejala Induk:</label>
+                            <select id="jawaban_induk_add" name="jawaban_induk" class="form-select">
+                                <option value="YA" {{ old('jawaban_induk') == 'YA' ? 'selected' : '' }}>YA</option>
+                                <option value="TIDAK" {{ old('jawaban_induk') == 'TIDAK' ? 'selected' : '' }}>TIDAK</option>
+                            </select>
+                        </div>
+                    </div>
+                    <hr/>
+                    <h6 class="fw-bold">Definisi Aturan Saat Ini:</h6>
                     <div class="mb-3">
-                        <label class="form-label">Gejala Sekarang</label>
-                        <select name="branches[${branchCounter}][id_gejala_sekarang]" class="form-select gejala-sekarang" required>
-                            <option value="">Pilih Gejala</option>
-                            @foreach ($gejalas as $gejala)
-                                <option value="{{ $gejala->kode_gejala }}">{{ $gejala->gejala }}</option>
+                        <label for="id_gejala_dasar_sekarang_add" class="form-label">Gejala untuk Aturan Ini (Pilih dari Gejala Dasar): <span class="text-danger">*</span></label>
+                        <select id="id_gejala_dasar_sekarang_add" name="id_gejala_dasar_sekarang" class="form-select" required>
+                            <option value="" disabled selected>Pilih Gejala Dasar</option>
+                            @foreach ($gejalaDasar as $gejala_dasar)
+                                <option value="{{ $gejala_dasar->kode_gejala }}" {{ old('id_gejala_dasar_sekarang') == $gejala_dasar->kode_gejala ? 'selected' : '' }}>
+                                    {{ $gejala_dasar->gejala }} ({{ $gejala_dasar->kode_gejala }})
+                                </option>
                             @endforeach
                         </select>
                     </div>
-
                     <div class="mb-3">
-                        <label class="form-label">Jawaban</label>
-                        <select name="branches[${branchCounter}][jawaban]" class="form-select" required>
-                            <option value="Ya">Ya</option>
-                            <option value="Tidak">Tidak</option>
+                        <label for="jawaban_sekarang_add" class="form-label">Jika Gejala Ini Dijawab: <span class="text-danger">*</span></label>
+                        <select id="jawaban_sekarang_add" name="jawaban_sekarang" class="form-select" required>
+                            <option value="YA" {{ old('jawaban_sekarang') == 'YA' ? 'selected' : '' }}>YA</option>
+                            <option value="TIDAK" {{ old('jawaban_sekarang') == 'TIDAK' ? 'selected' : '' }}>TIDAK</option>
                         </select>
                     </div>
-
                     <div class="mb-3">
-                        <label class="form-label">Gejala Selanjutnya</label>
-                        <select name="branches[${branchCounter}][id_gejala_selanjutnya]" class="form-select">
-                            <option value="">Pilih Gejala</option>
-                            @foreach ($gejalas as $gejala)
-                                <option value="{{ $gejala->kode_gejala }}">{{ $gejala->gejala }}</option>
+                        <label class="form-label">Maka Tindakan Selanjutnya: <span class="text-danger">*</span></label>
+                        <div class="form-check">
+                            <input class="form-check-input tindakan-selanjutnya-radio-add" type="radio" name="tindakan_selanjutnya" id="lanjut_gejala_add" value="gejala" {{ old('tindakan_selanjutnya', 'gejala') == 'gejala' ? 'checked' : '' }}>
+                            <label class="form-check-label" for="lanjut_gejala_add">Lanjut ke Gejala Lain</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input tindakan-selanjutnya-radio-add" type="radio" name="tindakan_selanjutnya" id="hasil_penyakit_add" value="penyakit" {{ old('tindakan_selanjutnya') == 'penyakit' ? 'checked' : '' }}>
+                            <label class="form-check-label" for="hasil_penyakit_add">Hasil Diagnosa Penyakit</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input tindakan-selanjutnya-radio-add" type="radio" name="tindakan_selanjutnya" id="akhir_jalur_add" value="akhir" {{ old('tindakan_selanjutnya') == 'akhir' ? 'checked' : '' }}>
+                            <label class="form-check-label" for="akhir_jalur_add">Akhiri Jalur (Tanpa Kesimpulan)</label>
+                        </div>
+                    </div>
+                    <div id="lanjut-gejala-container-add" class="mb-3">
+                        <label for="id_gejala_dasar_selanjutnya_add" class="form-label">Gejala Selanjutnya (Pilih dari Gejala Dasar):</label>
+                        <select id="id_gejala_dasar_selanjutnya_add" name="id_gejala_dasar_selanjutnya" class="form-select">
+                            <option value="">Pilih Gejala Dasar</option>
+                            @foreach ($gejalaDasar as $gejala_dasar)
+                                <option value="{{ $gejala_dasar->kode_gejala }}" {{ old('id_gejala_dasar_selanjutnya') == $gejala_dasar->kode_gejala ? 'selected' : '' }}>
+                                    {{ $gejala_dasar->gejala }} ({{ $gejala_dasar->kode_gejala }})
+                                </option>
                             @endforeach
                         </select>
-                        <small class="form-text text-muted">Biarkan kosong jika merupakan hasil akhir</small>
                     </div>
-                    
-                    <div class="mb-3 branch-disease-result" style="display: none;">
-                        <label class="form-label">Hasil Penyakit</label>
-                        <select name="branches[${branchCounter}][id_penyakit_hasil]" class="form-select">
+                    <div id="hasil-penyakit-container-add" class="mb-3" style="display:none;">
+                        <label for="id_penyakit_hasil_form_add" class="form-label">Hasil Penyakit:</label>
+                        <select id="id_penyakit_hasil_form_add" name="id_penyakit_hasil_form" class="form-select">
                             <option value="">Pilih Penyakit</option>
                             @foreach ($penyakits as $penyakit)
-                                <option value="{{ $penyakit->kode_penyakit }}">{{ $penyakit->penyakit }}</option>
+                                <option value="{{ $penyakit->kode_penyakit }}" {{ old('id_penyakit_hasil_form') == $penyakit->kode_penyakit ? 'selected' : '' }}>
+                                    {{ $penyakit->penyakit }} ({{ $penyakit->kode_penyakit }})
+                                </option>
                             @endforeach
                         </select>
-                        <small class="form-text text-muted">Pilih jika merupakan hasil akhir dari percabangan</small>
                     </div>
-                    
-                    <button type="button" class="btn btn-sm btn-outline-danger remove-branch">
-                        <i class="bi bi-trash"></i> Hapus Percabangan
-                    </button>
-                `;
+                </div>
+                <div class="modal-footer custom-modal-footer">
+                    <button type="submit" class="btn btn-primary">Simpan Aturan</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-                branchesContainer.appendChild(newBranch);
-                branchCounter++;
+@foreach ($aturans as $aturan)
+<div class="modal fade" id="editAturanModal{{ $aturan->id }}" tabindex="-1" aria-labelledby="editAturanModalLabel{{ $aturan->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content custom-modal">
+            <div class="modal-header custom-modal-header">
+                <h5 class="modal-title fw-bold" id="editAturanModalLabel{{ $aturan->id }}">Edit Aturan ISPA</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('admin.aturan.update', $aturan->id) }}" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-body custom-modal-body">
+                    <p><strong>Mengedit Aturan Untuk:</strong></p>
+                    <p>
+                        Gejala Sekarang (Kode Kontekstual): <strong>{{ $aturan->id_gejala_sekarang }}</strong>
+                        ({{ $aturan->gejalaSekarangRel ? $aturan->gejalaSekarangRel->gejala : 'N/A' }})
+                    </p>
+                    <p>Jika Dijawab: <strong>{{ $aturan->jawaban }}</strong></p>
+                    <hr/>
+                    <h6 class="fw-bold">Ubah Tindakan Selanjutnya:</h6>
+                    @php
+                        $tipeTindakanEdit = 'akhir';
+                        if (!empty($aturan->id_gejala_selanjutnya)) {
+                            $tipeTindakanEdit = 'gejala';
+                        } elseif (!empty($aturan->id_penyakit_hasil)) {
+                            $tipeTindakanEdit = 'penyakit';
+                        }
+                    @endphp
+                    <div class="mb-3">
+                        <label class="form-label">Pilih Tindakan Baru:</label>
+                        <div class="form-check">
+                            <input class="form-check-input tindakan-edit-radio" data-target-id="{{ $aturan->id }}" type="radio" name="tindakan_selanjutnya_edit" id="lanjut_gejala_edit_{{ $aturan->id }}" value="gejala" {{ old('tindakan_selanjutnya_edit', $tipeTindakanEdit) == 'gejala' ? 'checked' : '' }}>
+                            <label class="form-check-label" for="lanjut_gejala_edit_{{ $aturan->id }}">Lanjut ke Gejala Lain</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input tindakan-edit-radio" data-target-id="{{ $aturan->id }}" type="radio" name="tindakan_selanjutnya_edit" id="hasil_penyakit_edit_{{ $aturan->id }}" value="penyakit" {{ old('tindakan_selanjutnya_edit', $tipeTindakanEdit) == 'penyakit' ? 'checked' : '' }}>
+                            <label class="form-check-label" for="hasil_penyakit_edit_{{ $aturan->id }}">Hasil Diagnosa Penyakit</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input tindakan-edit-radio" data-target-id="{{ $aturan->id }}" type="radio" name="tindakan_selanjutnya_edit" id="akhir_jalur_edit_{{ $aturan->id }}" value="akhir" {{ old('tindakan_selanjutnya_edit', $tipeTindakanEdit) == 'akhir' ? 'checked' : '' }}>
+                            <label class="form-check-label" for="akhir_jalur_edit_{{ $aturan->id }}">Akhiri Jalur</label>
+                        </div>
+                    </div>
 
-                // Make "Remove" buttons visible after adding more than one branch
-                document.querySelectorAll('.remove-branch').forEach(btn => {
-                    btn.style.display = 'inline-block';
-                });
+                    <div id="lanjut-gejala-container-edit-{{ $aturan->id }}" class="mb-3">
+                        <label for="id_gejala_dasar_selanjutnya_edit_{{ $aturan->id }}" class="form-label">Gejala Selanjutnya (Pilih dari Gejala Dasar):</label>
+                        <select id="id_gejala_dasar_selanjutnya_edit_{{ $aturan->id }}" name="id_gejala_dasar_selanjutnya_edit" class="form-select">
+                            <option value="">Pilih Gejala Dasar</option>
+                            @php $kodeDasarSelanjutnya = $aturan->id_gejala_selanjutnya ? explode('_fr_', $aturan->id_gejala_selanjutnya)[0] : ''; @endphp
+                            @foreach ($gejalaDasar as $gejala_dasar)
+                                <option value="{{ $gejala_dasar->kode_gejala }}" {{ old('id_gejala_dasar_selanjutnya_edit', $kodeDasarSelanjutnya) == $gejala_dasar->kode_gejala ? 'selected' : '' }}>
+                                    {{ $gejala_dasar->gejala }} ({{ $gejala_dasar->kode_gejala }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
 
-                // Update which branch shows the disease result field
-                updateDiseaseResultVisibility();
-            });
+                    <div id="hasil-penyakit-container-edit-{{ $aturan->id }}" class="mb-3">
+                        <label for="id_penyakit_hasil_form_edit_{{ $aturan->id }}" class="form-label">Hasil Penyakit:</label>
+                        <select id="id_penyakit_hasil_form_edit_{{ $aturan->id }}" name="id_penyakit_hasil_form_edit" class="form-select">
+                            <option value="">Pilih Penyakit</option>
+                            @foreach ($penyakits as $penyakit)
+                                <option value="{{ $penyakit->kode_penyakit }}" {{ old('id_penyakit_hasil_form_edit', $aturan->id_penyakit_hasil) == $penyakit->kode_penyakit ? 'selected' : '' }}>
+                                    {{ $penyakit->penyakit }} ({{ $penyakit->kode_penyakit }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer custom-modal-footer">
+                    <button type="submit" class="btn btn-primary">Update Aturan</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
-            // Remove branch button functionality (using event delegation)
-            document.getElementById('branches-container').addEventListener('click', function(event) {
-                if (event.target.classList.contains('remove-branch') || event.target.parentElement.classList
-                    .contains('remove-branch')) {
-                    const button = event.target.classList.contains('remove-branch') ?
-                        event.target : event.target.parentElement;
-                    button.closest('.branch-group').remove();
+<div class="modal fade" id="deleteAturanModal{{ $aturan->id }}" tabindex="-1" aria-labelledby="deleteAturanModalLabel{{ $aturan->id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content custom-modal">
+            <div class="modal-header custom-modal-header">
+                <h5 class="modal-title fw-bold" id="deleteAturanModalLabel{{ $aturan->id }}">Konfirmasi Hapus Aturan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body custom-modal-body">
+                <p>Apakah Anda yakin ingin menghapus aturan ini?</p>
+                <p><strong>Gejala Sekarang:</strong> {{ $aturan->id_gejala_sekarang }} ({{ $aturan->gejalaSekarangRel ? $aturan->gejalaSekarangRel->gejala : '-' }})</p>
+                <p><strong>Jawaban:</strong> {{ $aturan->jawaban }}</p>
+            </div>
+            <div class="modal-footer custom-modal-footer">
+                <form action="{{ route('admin.aturan.destroy', $aturan->id) }}" method="POST" class="d-inline">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger">Ya, Hapus</button>
+                </form>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endforeach
+@endsection
 
-                    // Hide the remove button on the only remaining branch
-                    if (document.querySelectorAll('.branch-group').length === 1) {
-                        document.querySelector('.remove-branch').style.display = 'none';
-                    }
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const isPertanyaanAwalCheckboxAdd = document.getElementById('is_pertanyaan_awal_checkbox_add');
+    const parentRuleSelectionDivAdd = document.getElementById('parent-rule-selection-add');
+    const tindakanRadioButtonsAdd = document.querySelectorAll('input[name="tindakan_selanjutnya"]');
+    const lanjutGejalaContainerAdd = document.getElementById('lanjut-gejala-container-add');
+    const hasilPenyakitContainerAdd = document.getElementById('hasil-penyakit-container-add');
+    const selectGejalaSelanjutnyaAdd = document.getElementById('id_gejala_dasar_selanjutnya_add');
+    const selectPenyakitHasilAdd = document.getElementById('id_penyakit_hasil_form_add');
 
-                    // Renumber branches for visual clarity
-                    document.querySelectorAll('.branch-group h6').forEach((header, index) => {
-                        header.textContent = `Percabangan ${index + 1}`;
-                    });
+    function toggleParentRuleSelectionAdd() {
+        if (isPertanyaanAwalCheckboxAdd.checked) {
+            parentRuleSelectionDivAdd.style.display = 'none';
+            document.getElementById('id_gejala_induk_kontekstual_add').required = false;
+            document.getElementById('jawaban_induk_add').required = false;
+        } else {
+            parentRuleSelectionDivAdd.style.display = 'block';
+            document.getElementById('id_gejala_induk_kontekstual_add').required = true;
+            document.getElementById('jawaban_induk_add').required = true;
+        }
+    }
 
-                    // Update which branch shows the disease result field
-                    updateDiseaseResultVisibility();
+    function toggleTindakanSelanjutnyaAdd() {
+        let selectedValue = '';
+        tindakanRadioButtonsAdd.forEach(radio => {
+            if (radio.checked) {
+                selectedValue = radio.value;
+            }
+        });
+
+        if (selectedValue === 'gejala') {
+            lanjutGejalaContainerAdd.style.display = 'block';
+            hasilPenyakitContainerAdd.style.display = 'none';
+            selectGejalaSelanjutnyaAdd.required = true;
+            selectPenyakitHasilAdd.required = false;
+            selectPenyakitHasilAdd.value = '';
+        } else if (selectedValue === 'penyakit') {
+            lanjutGejalaContainerAdd.style.display = 'none';
+            hasilPenyakitContainerAdd.style.display = 'block';
+            selectGejalaSelanjutnyaAdd.required = false;
+            selectGejalaSelanjutnyaAdd.value = '';
+            selectPenyakitHasilAdd.required = true;
+        } else {
+            lanjutGejalaContainerAdd.style.display = 'none';
+            hasilPenyakitContainerAdd.style.display = 'none';
+            selectGejalaSelanjutnyaAdd.required = false;
+            selectGejalaSelanjutnyaAdd.value = '';
+            selectPenyakitHasilAdd.required = false;
+            selectPenyakitHasilAdd.value = '';
+        }
+    }
+
+    if(isPertanyaanAwalCheckboxAdd) {
+        isPertanyaanAwalCheckboxAdd.addEventListener('change', toggleParentRuleSelectionAdd);
+        toggleParentRuleSelectionAdd();
+    }
+
+    tindakanRadioButtonsAdd.forEach(radio => {
+        radio.addEventListener('change', toggleTindakanSelanjutnyaAdd);
+    });
+    toggleTindakanSelanjutnyaAdd();
+
+    document.querySelectorAll('.modal.fade[id^="editAturanModal"]').forEach(modal => {
+        const aturanId = modal.id.replace('editAturanModal', '');
+        const tindakanEditRadioButtons = modal.querySelectorAll('.tindakan-edit-radio[data-target-id="' + aturanId + '"]');
+        const lanjutGejalaContainerEdit = modal.querySelector('#lanjut-gejala-container-edit-' + aturanId);
+        const hasilPenyakitContainerEdit = modal.querySelector('#hasil-penyakit-container-edit-' + aturanId);
+        const selectGejalaSelanjutnyaEdit = modal.querySelector('#id_gejala_dasar_selanjutnya_edit_' + aturanId);
+        const selectPenyakitHasilEdit = modal.querySelector('#id_penyakit_hasil_form_edit_' + aturanId);
+
+        function toggleTindakanSelanjutnyaEdit() {
+            let selectedValueEdit = '';
+            tindakanEditRadioButtons.forEach(radio => {
+                if (radio.checked) {
+                    selectedValueEdit = radio.value;
                 }
             });
 
-            // Initialize on page load
-            updateDiseaseResultVisibility();
+            if (lanjutGejalaContainerEdit && hasilPenyakitContainerEdit && selectGejalaSelanjutnyaEdit && selectPenyakitHasilEdit) {
+                if (selectedValueEdit === 'gejala') {
+                    lanjutGejalaContainerEdit.style.display = 'block';
+                    hasilPenyakitContainerEdit.style.display = 'none';
+                    selectGejalaSelanjutnyaEdit.required = true;
+                    selectPenyakitHasilEdit.required = false;
+                    if (selectPenyakitHasilEdit) selectPenyakitHasilEdit.value = '';
+                } else if (selectedValueEdit === 'penyakit') {
+                    lanjutGejalaContainerEdit.style.display = 'none';
+                    hasilPenyakitContainerEdit.style.display = 'block';
+                    selectGejalaSelanjutnyaEdit.required = false;
+                    if (selectGejalaSelanjutnyaEdit) selectGejalaSelanjutnyaEdit.value = '';
+                    selectPenyakitHasilEdit.required = true;
+                } else {
+                    lanjutGejalaContainerEdit.style.display = 'none';
+                    hasilPenyakitContainerEdit.style.display = 'none';
+                    selectGejalaSelanjutnyaEdit.required = false;
+                    if (selectGejalaSelanjutnyaEdit) selectGejalaSelanjutnyaEdit.value = '';
+                    selectPenyakitHasilEdit.required = false;
+                    if (selectPenyakitHasilEdit) selectPenyakitHasilEdit.value = '';
+                }
+            }
+        }
+
+        tindakanEditRadioButtons.forEach(radio => {
+            radio.addEventListener('change', toggleTindakanSelanjutnyaEdit);
         });
-    </script>
+        toggleTindakanSelanjutnyaEdit();
+    });
+});
+</script>
 @endpush

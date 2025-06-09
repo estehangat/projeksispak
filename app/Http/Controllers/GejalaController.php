@@ -9,51 +9,53 @@ class GejalaController extends Controller
 {
     public function index()
     {
-        $gejalas = Gejala::all();
+        $gejalas = Gejala::whereNotLike('kode_gejala', '%\\_%')
+                            ->orderBy('kode_gejala', 'asc')
+                            ->get();
+        
         $gejalaCount = $gejalas->count();
+        
         return view('admin.gejala.index', compact('gejalas', 'gejalaCount'));
     }
 
     public function create()
     {
-        return view('gejala.create');
+        return view('admin.gejala.create');
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'kode_gejala' => 'required|string|max:10|unique:gejala',
+            'kode_gejala' => 'required|string|max:10|unique:gejala,kode_gejala', 
             'gejala' => 'required|string|max:255',
         ]);
 
         Gejala::create($request->all());
 
-        return redirect()->route('admin.gejala')->with('success', 'Gejala created successfully.');
+        return redirect()->route('admin.gejala.index')->with('success', 'Gejala dasar berhasil ditambahkan.');
     }
 
-    public function edit($id)
+    public function edit(Gejala $gejala)
     {
-        $gejala = Gejala::findOrFail($id);
-        return view('gejala.edit', compact('gejala'));
+        return view('admin.gejala.edit', compact('gejala'));
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, Gejala $gejala)
     {
         $request->validate([
-            'kode_gejala' => 'required|string|max:10|unique:gejala,kode_gejala,' . $id,
+            'kode_gejala' => 'required|string|max:10|unique:gejala,kode_gejala,' . $gejala->id, 
             'gejala' => 'required|string|max:255',
         ]);
 
-        $gejala = Gejala::findOrFail($id);
         $gejala->update($request->all());
 
-        return redirect()->route('admin.gejala')->with('success', 'Gejala updated successfully.');
+        return redirect()->route('admin.gejala.index')->with('success', 'Gejala berhasil diperbarui.');
     }
-    public function destroy($id)
+
+    public function destroy(Gejala $gejala)
     {
-        $gejala = Gejala::findOrFail($id);
         $gejala->delete();
 
-        return redirect()->route('admin.gejala')->with('success', 'Gejala deleted successfully.');
+        return redirect()->route('admin.gejala.index')->with('success', 'Gejala berhasil dihapus.');
     }
 }

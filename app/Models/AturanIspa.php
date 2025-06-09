@@ -19,18 +19,12 @@ class AturanIspa extends Model
         'is_pertanyaan_awal',
     ];
 
-    public function gejalaSekarang()
-    {
-        return $this->belongsTo(Gejala::class, 'id_gejala_sekarang', 'kode_gejala');
-    }
-
-    public function gejalaSelanjutnya()
-    {
-        return $this->belongsTo(Gejala::class, 'id_gejala_selanjutnya', 'kode_gejala');
-    }
-
-    public function penyakitHasil()
-    {
-        return $this->belongsTo(Penyakit::class, 'id_penyakit_hasil', 'kode_penyakit');
-    }
+public function gejalaSekarangRel() {
+    return $this->belongsTo(Gejala::class, 'id_gejala_sekarang', 'kode_gejala');
 }
+public function gejalaSelanjutnyaRel() {
+    return $this->belongsTo(Gejala::class, 'id_gejala_selanjutnya', 'kode_gejala');
+}
+public function penyakitHasilRel() {
+    return $this->belongsTo(Penyakit::class, 'id_penyakit_hasil', 'kode_penyakit');
+}}

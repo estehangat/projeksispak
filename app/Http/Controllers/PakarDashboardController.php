@@ -6,197 +6,345 @@ use App\Models\Gejala;
 use App\Models\Penyakit;
 use App\Models\AturanIspa;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 
 class PakarDashboardController extends Controller
 {
     public function index()
     {
-        $gejalas = Gejala::all();
-        $gejalaCount = $gejalas->count();
-        $penyakits = Penyakit::all();
-        $penyakitCount = $penyakits->count();
+        $gejalaDasarTampil = Gejala::whereNotLike('kode_gejala', '%\\_%')
+            ->orderBy('kode_gejala', 'asc')
+            ->get();
+        
+        $gejalaCount = $gejalaDasarTampil->count();
 
-        return view('pakar.index', compact('gejalas', 'gejalaCount', 'penyakits', 'penyakitCount'));
+        $penyakits = Penyakit::orderBy('kode_penyakit')->get();
+        $penyakitCount = $penyakits->count();
+        
+        $aturanCount = AturanIspa::count();
+
+        return view('pakar.index', compact(
+            'gejalaDasarTampil',
+            'gejalaCount',
+            'penyakits',
+            'penyakitCount',
+            'aturanCount'
+        ));
     }
 
     public function gejalaIndex()
     {
-        $gejalas = Gejala::all();
-        $gejalaCount = $gejalas->count();
-        return view('pakar.gejala.index', compact('gejalas', 'gejalaCount'));
-    }
+        $gejalas = Gejala::whereNotLike('kode_gejala', '%\\_%')
+            ->orderBy('kode_gejala', 'asc')
+            ->paginate(10);
+        
+        $gejalaCountTotal = Gejala::whereNotLike('kode_gejala', '%\\_%')->count();
 
-    public function gejalaCreate()
-    {
-        return view('gejala.create');
+        return view('pakar.gejala.index', compact('gejalas', 'gejalaCountTotal'));
     }
 
     public function gejalaStore(Request $request)
     {
         $request->validate([
-            'kode_gejala' => 'required|string|max:10|unique:gejala',
+            'kode_gejala' => [
+                'required', 'string', 'max:10',
+                Rule::unique('gejala', 'kode_gejala'),
+                function ($attribute, $value, $fail) {
+                    if (Str::contains($value, '_')) {
+                        $fail('Kode Gejala Dasar tidak boleh mengandung karakter underscore (_).');
+                    }
+                },
+            ],
             'gejala' => 'required|string|max:255',
         ]);
 
         Gejala::create($request->all());
-
-        return redirect()->route('pakar.gejala')->with('success', 'Gejala created successfully.');
+        return redirect()->route('pakar.gejala.index')->with('success', 'Gejala dasar berhasil ditambahkan.');
     }
 
-    public function gejalaEdit($id)
+    public function gejalaEdit(Gejala $gejala)
     {
-        $gejala = Gejala::findOrFail($id);
-        return view('gejala.edit', compact('gejala'));
+        return view('pakar.gejala.edit', compact('gejala'));
     }
 
-    public function gejalaUpdate(Request $request, $id)
+    public function gejalaUpdate(Request $request, Gejala $gejala)
     {
         $request->validate([
-            'kode_gejala' => 'required|string|max:10|unique:gejala,kode_gejala,' . $id,
+            'kode_gejala' => [
+                'required', 'string', 'max:10',
+                Rule::unique('gejala', 'kode_gejala')->ignore($gejala->id),
+                function ($attribute, $value, $fail) {
+                    if (Str::contains($value, '_')) {
+                        $fail('Kode Gejala Dasar tidak boleh mengandung karakter underscore (_).');
+                    }
+                },
+            ],
             'gejala' => 'required|string|max:255',
         ]);
-
-        $gejala = Gejala::findOrFail($id);
+        
         $gejala->update($request->all());
-
-        return redirect()->route('pakar.gejala')->with('success', 'Gejala updated successfully.');
+        return redirect()->route('pakar.gejala.index')->with('success', 'Gejala berhasil diperbarui.');
     }
-    public function gejalaDestroy($id)
-    {
-        $gejala = Gejala::findOrFail($id);
-        $gejala->delete();
 
-        return redirect()->route('pakar.gejala')->with('success', 'Gejala deleted successfully.');
+    public function gejalaDestroy(Gejala $gejala)
+    {
+        if (Str::contains($gejala->kode_gejala, '_fr_')) {
+        }
+
+        if (AturanIspa::where('id_gejala_sekarang', $gejala->kode_gejala)
+                        ->orWhere('id_gejala_selanjutnya', $gejala->kode_gejala)
+                        ->exists()) {
+            return redirect()->route('pakar.gejala.index')->with('error', 'Gejala tidak bisa dihapus karena masih digunakan dalam aturan diagnosa. Hapus aturan terkait terlebih dahulu.');
+        }
+        $gejala->delete();
+        return redirect()->route('pakar.gejala.index')->with('success', 'Gejala berhasil dihapus.');
     }
 
     public function penyakitIndex()
     {
-        // Logic to retrieve and display all diseases
-        $penyakits = Penyakit::all();
+        $penyakits = Penyakit::orderBy('kode_penyakit')->get();
         $penyakitCount = $penyakits->count();
         return view('pakar.penyakit.index', compact('penyakits', 'penyakitCount'));
     }
 
-    public function penyakitCreate()
-    {
-        // Logic to show the form for creating a new disease
-        return view('penyakit.create');
-    }
-
     public function penyakitStore(Request $request)
     {
-        // Logic to store a new disease in the database
         $request->validate([
-            'kode_penyakit' => 'required|string|max:10|unique:penyakit',
+            'kode_penyakit' => ['required', 'string', 'max:10', Rule::unique('penyakit', 'kode_penyakit')],
             'penyakit' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+            'solusi' => 'nullable|string',
         ]);
-
-        // Assuming Penyakit is a model that handles the diseases table
         Penyakit::create($request->all());
-
-        return redirect()->route('pakar.penyakit')->with('success', 'Penyakit berhasil ditambahkan.');
+        return redirect()->route('pakar.penyakit.index')->with('success', 'Penyakit berhasil ditambahkan.');
     }
 
-    public function penyakitEdit($id)
+    public function penyakitEdit(Penyakit $penyakit)
     {
-        // Logic to show the form for editing an existing disease
-        $penyakit = Penyakit::findOrFail($id);
-        return view('penyakit.edit', compact('penyakit'));
+        return view('pakar.penyakit.edit', compact('penyakit'));
     }
 
-    public function penyakitUpdate(Request $request, $id)
+    public function penyakitUpdate(Request $request, Penyakit $penyakit)
     {
-        // Logic to update an existing disease in the database
         $request->validate([
-            'kode_penyakit' => 'required|string|max:10|unique:penyakit,kode_penyakit,' . $id,
+            'kode_penyakit' => ['required', 'string', 'max:10', Rule::unique('penyakit', 'kode_penyakit')->ignore($penyakit->id)],
             'penyakit' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+            'solusi' => 'nullable|string',
         ]);
-
-        $penyakit = Penyakit::findOrFail($id);
         $penyakit->update($request->all());
-
-        return redirect()->route('pakar.penyakit')->with('success', 'Penyakit berhasil diperbarui.');
+        return redirect()->route('pakar.penyakit.index')->with('success', 'Penyakit berhasil diperbarui.');
     }
 
-    public function penyakitDestroy($id)
+    public function penyakitDestroy(Penyakit $penyakit)
     {
-        // Logic to delete an existing disease from the database
-        $penyakit = Penyakit::findOrFail($id);
+        if (AturanIspa::where('id_penyakit_hasil', $penyakit->kode_penyakit)->exists()) {
+             return redirect()->route('pakar.penyakit.index')->with('error', 'Penyakit tidak bisa dihapus karena masih digunakan sebagai hasil diagnosa dalam aturan.');
+        }
         $penyakit->delete();
-
-        return redirect()->route('pakar.penyakit')->with('success', 'Penyakit berhasil dihapus.');
+        return redirect()->route('pakar.penyakit.index')->with('success', 'Penyakit berhasil dihapus.');
     }
 
     public function aturanIndex()
     {
-        $aturans = AturanIspa::all();
-        $gejalas = Gejala::all();
-        $penyakits = Penyakit::all();
+        $aturans = AturanIspa::with(['gejalaSekarangRel', 'gejalaSelanjutnyaRel', 'penyakitHasilRel'])
+            ->orderBy('is_pertanyaan_awal', 'desc')
+            ->orderBy('id_gejala_sekarang')
+            ->orderBy('jawaban')
+            ->paginate(15);
 
-        return view('pakar.aturan.index', compact('aturans', 'gejalas', 'penyakits'));
+        $gejalaDasar = Gejala::whereNotLike('kode_gejala', '%\\_%')
+            ->orderBy('kode_gejala')
+            ->get();
+        
+        $kodeGejalaIndukPotensial = AturanIspa::select('id_gejala_sekarang')
+            ->whereNull('id_penyakit_hasil')
+            ->distinct()
+            ->pluck('id_gejala_sekarang');
+
+        $calonIndukDariDasar = Gejala::whereNotLike('kode_gejala', '%\\_%')
+            ->whereNotIn('kode_gejala', $kodeGejalaIndukPotensial)
+            ->pluck('kode_gejala');
+        
+        $semuaKodeIndukPotensial = $kodeGejalaIndukPotensial->merge($calonIndukDariDasar)->unique();
+
+        $gejalaIndukPotensial = Gejala::whereIn('kode_gejala', $semuaKodeIndukPotensial)
+            ->orderBy('kode_gejala')
+            ->get();
+
+        $penyakits = Penyakit::orderBy('kode_penyakit')->get();
+
+        return view('pakar.aturan.index', compact('aturans', 'gejalaDasar', 'gejalaIndukPotensial', 'penyakits'));
+    }
+
+    private function getOrCreateKontekstualGejala(string $kodeGejalaDasar, ?string $kodeIndukKontekstual, ?string $jawabanIndukUntukAnak): string
+    {
+        if (empty($kodeIndukKontekstual) || empty($jawabanIndukUntukAnak)) {
+            $gejalaDasarInfo = Gejala::where('kode_gejala', $kodeGejalaDasar)->first();
+            if (!$gejalaDasarInfo) {
+                throw new \Exception("Gejala dasar '{$kodeGejalaDasar}' tidak ditemukan.");
+            }
+            return $kodeGejalaDasar;
+        }
+
+        $jawabanSuffix = (strtoupper($jawabanIndukUntukAnak) == 'YA') ? 'Y' : 'T';
+        $kodeKontekstual = $kodeGejalaDasar . "_fr_" . $kodeIndukKontekstual . "_" . $jawabanSuffix;
+
+        $gejala = Gejala::where('kode_gejala', $kodeKontekstual)->first();
+        if (!$gejala) {
+            $gejalaDasarInfo = Gejala::where('kode_gejala', $kodeGejalaDasar)->first();
+            if (!$gejalaDasarInfo) {
+                throw new \Exception("Gejala dasar '{$kodeGejalaDasar}' tidak ditemukan saat membuat '{$kodeKontekstual}'.");
+            }
+            Gejala::create([
+                'kode_gejala' => $kodeKontekstual,
+                'gejala' => $gejalaDasarInfo->gejala,
+            ]);
+        }
+        return $kodeKontekstual;
     }
 
     public function aturanStore(Request $request)
     {
-        $request->validate([
-            'branches' => 'required|array',
-            'branches.*.id_gejala_sekarang' => 'required',
-            'branches.*.jawaban' => 'required',
+        $validated = $request->validate([
+            'is_pertanyaan_awal_checkbox' => 'nullable|boolean',
+            'id_gejala_induk_kontekstual' => Rule::requiredIf(!$request->has('is_pertanyaan_awal_checkbox')),
+            'jawaban_induk' => Rule::requiredIf(!$request->has('is_pertanyaan_awal_checkbox')),
+            'id_gejala_dasar_sekarang' => 'required|string|exists:gejala,kode_gejala',
+            'jawaban_sekarang' => 'required|in:YA,TIDAK',
+            'tindakan_selanjutnya' => 'required|in:gejala,penyakit,akhir',
+            'id_gejala_dasar_selanjutnya' => 'required_if:tindakan_selanjutnya,gejala|nullable|string|exists:gejala,kode_gejala',
+            'id_penyakit_hasil_form' => 'required_if:tindakan_selanjutnya,penyakit|nullable|string|exists:penyakit,kode_penyakit',
         ]);
 
-        $isPertanyaanAwal = $request->has('is_pertanyaan_awal') ? 1 : 0;
+        $isAkarPohon = $request->has('is_pertanyaan_awal_checkbox');
+        $kodeGejalaSekarangKontekstual = '';
 
-        // For single branch case
-        if (count($request->branches) == 1 && empty($request->branches[0]['id_penyakit_hasil'])) {
-            $idPenyakitHasil = $request->id_penyakit_hasil;
-        } else {
-            $idPenyakitHasil = null;
-        }
+        DB::beginTransaction();
+        try {
+            if ($isAkarPohon) {
+                $kodeGejalaSekarangKontekstual = $validated['id_gejala_dasar_sekarang'];
+                $gejalaAkarInfo = Gejala::firstWhere('kode_gejala', $kodeGejalaSekarangKontekstual);
+                if(!$gejalaAkarInfo || Str::contains($gejalaAkarInfo->kode_gejala, '_fr_')) {
+                    DB::rollBack();
+                    return redirect()->back()->with('error', 'Pertanyaan awal harus merupakan gejala dasar (tanpa _fr_).')->withInput();
+                }
+                
+                $otherAkar = AturanIspa::where('is_pertanyaan_awal', true)
+                                          ->where('id_gejala_sekarang', '!=', $kodeGejalaSekarangKontekstual)
+                                          ->first();
+                if ($otherAkar) {
+                     DB::rollBack();
+                     return redirect()->route('pakar.aturan.index')->with('error', "Sudah ada pertanyaan awal lain ({$otherAkar->id_gejala_sekarang}) yang terdaftar. Hanya boleh ada satu gejala akar untuk keseluruhan pohon.");
+                }
 
-        foreach ($request->branches as $index => $branch) {
-            // For multiple branches, only use penyakit from the last branch
-            if ($index == count($request->branches) - 1 && !empty($branch['id_penyakit_hasil'])) {
-                $branchPenyakitHasil = $branch['id_penyakit_hasil'];
+                $existingAwalSpecific = AturanIspa::where('is_pertanyaan_awal', true)
+                                                    ->where('id_gejala_sekarang', $kodeGejalaSekarangKontekstual)
+                                                    ->where('jawaban', $validated['jawaban_sekarang'])
+                                                    ->first();
+                if($existingAwalSpecific){
+                    DB::rollBack();
+                    return redirect()->route('pakar.aturan.index')->with('error', "Aturan awal untuk gejala '{$kodeGejalaSekarangKontekstual}' dengan jawaban '{$validated['jawaban_sekarang']}' sudah ada.");
+                }
+
             } else {
-                $branchPenyakitHasil = null;
+                if (empty($validated['id_gejala_induk_kontekstual']) || empty($validated['jawaban_induk'])) {
+                    DB::rollBack();
+                    return redirect()->back()->with('error', 'Gejala Induk dan Jawaban Induk harus dipilih jika bukan pertanyaan awal.')->withInput();
+                }
+                $kodeGejalaSekarangKontekstual = $this->getOrCreateKontekstualGejala(
+                    $validated['id_gejala_dasar_sekarang'],
+                    $validated['id_gejala_induk_kontekstual'],
+                    $validated['jawaban_induk']
+                );
+            }
+
+            $existingRule = AturanIspa::where('id_gejala_sekarang', $kodeGejalaSekarangKontekstual)
+                                        ->where('jawaban', $validated['jawaban_sekarang'])
+                                        ->first();
+            if ($existingRule) {
+                DB::rollBack();
+                return redirect()->route('pakar.aturan.index')->with('error', "Aturan untuk gejala '{$kodeGejalaSekarangKontekstual}' dengan jawaban '{$validated['jawaban_sekarang']}' sudah ada.");
+            }
+
+            $idGejalaSelanjutnyaFinalKontekstual = null;
+            $idPenyakitHasilFinal = null;
+
+            if ($validated['tindakan_selanjutnya'] === 'gejala') {
+                $idGejalaSelanjutnyaFinalKontekstual = $this->getOrCreateKontekstualGejala(
+                    $validated['id_gejala_dasar_selanjutnya'],
+                    $kodeGejalaSekarangKontekstual,
+                    $validated['jawaban_sekarang']
+                );
+            } elseif ($validated['tindakan_selanjutnya'] === 'penyakit') {
+                $idPenyakitHasilFinal = $validated['id_penyakit_hasil_form'];
             }
 
             AturanIspa::create([
-                'id_gejala_sekarang' => $branch['id_gejala_sekarang'],
-                'jawaban' => $branch['jawaban'],
-                'id_gejala_selanjutnya' => $branch['id_gejala_selanjutnya'] ?? null,
-                'id_penyakit_hasil' => $branchPenyakitHasil ?? $idPenyakitHasil,
-                'is_pertanyaan_awal' => $isPertanyaanAwal,
+                'id_gejala_sekarang' => $kodeGejalaSekarangKontekstual,
+                'jawaban' => $validated['jawaban_sekarang'],
+                'id_gejala_selanjutnya' => $idGejalaSelanjutnyaFinalKontekstual,
+                'id_penyakit_hasil' => $idPenyakitHasilFinal,
+                'is_pertanyaan_awal' => $isAkarPohon,
             ]);
+
+            DB::commit();
+            return redirect()->route('pakar.aturan.index')->with('success', 'Aturan berhasil ditambahkan.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('pakar.aturan.index')->with('error', 'Gagal menambahkan aturan: Terjadi kesalahan sistem.');
         }
-
-        return redirect()->route('pakar.aturan')->with('success', 'Aturan berhasil ditambahkan');
+    }
+    
+    public function aturanUpdate(Request $request, AturanIspa $aturan)
+    {
+        $validated = $request->validate([
+            'tindakan_selanjutnya_edit' => 'required|in:gejala,penyakit,akhir',
+            'id_gejala_dasar_selanjutnya_edit' => 'required_if:tindakan_selanjutnya_edit,gejala|nullable|string|exists:gejala,kode_gejala',
+            'id_penyakit_hasil_form_edit' => 'required_if:tindakan_selanjutnya_edit,penyakit|nullable|string|exists:penyakit,kode_penyakit',
+        ]);
+    
+        DB::beginTransaction();
+        try {
+            $idGejalaSelanjutnyaFinalKontekstual = null;
+            $idPenyakitHasilFinal = null;
+    
+            if ($validated['tindakan_selanjutnya_edit'] === 'gejala') {
+                $idGejalaSelanjutnyaFinalKontekstual = $this->getOrCreateKontekstualGejala(
+                    $validated['id_gejala_dasar_selanjutnya_edit'],
+                    $aturan->id_gejala_sekarang, 
+                    $aturan->jawaban
+                );
+            } elseif ($validated['tindakan_selanjutnya_edit'] === 'penyakit') {
+                $idPenyakitHasilFinal = $validated['id_penyakit_hasil_form_edit'];
+            }
+    
+            $aturan->update([
+                'id_gejala_selanjutnya' => $idGejalaSelanjutnyaFinalKontekstual,
+                'id_penyakit_hasil' => $idPenyakitHasilFinal,
+            ]);
+    
+            DB::commit();
+            return redirect()->route('pakar.aturan.index')->with('success', 'Aturan berhasil diperbarui.');
+    
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->route('pakar.aturan.index')->with('error', 'Gagal memperbarui aturan: ' . $e->getMessage());
+        }
     }
 
-    public function aturanUpdate(Request $request, $id)
+    public function aturanDestroy(AturanIspa $aturan)
     {
-        $request->validate([
-            'id_gejala_sekarang' => 'required',
-            'jawaban' => 'required',
-        ]);
-
-        $aturan = AturanIspa::findOrFail($id);
-        $aturan->update([
-            'id_gejala_sekarang' => $request->id_gejala_sekarang,
-            'jawaban' => $request->jawaban,
-            'id_gejala_selanjutnya' => $request->id_gejala_selanjutnya,
-            'id_penyakit_hasil' => $request->id_penyakit_hasil,
-            'is_pertanyaan_awal' => $request->has('is_pertanyaan_awal') ? 1 : 0,
-        ]);
-
-        return redirect()->route('pakar.aturan')->with('success', 'Aturan berhasil diperbarui');
-    }
-
-    public function aturanDestroy($id)
-    {
-        $aturan = AturanIspa::findOrFail($id);
+        if ($aturan->id_gejala_selanjutnya) {
+            $adaAnak = AturanIspa::where('id_gejala_sekarang', $aturan->id_gejala_selanjutnya)->exists();
+            if ($adaAnak) {
+                return redirect()->route('pakar.aturan.index')->with('error', 'Tidak bisa menghapus aturan ini karena gejala selanjutnya dari aturan ini masih menjadi pertanyaan di aturan lain. Hapus aturan anaknya terlebih dahulu.');
+            }
+        }
         $aturan->delete();
-
-        return redirect()->route('pakar.aturan')->with('success', 'Aturan berhasil dihapus');
+        return redirect()->route('pakar.aturan.index')->with('success', 'Aturan berhasil dihapus.');
     }
 }
