@@ -19,11 +19,13 @@
                     <thead>
                         <tr class="table-header">
                             <th style="width: 50px;">#</th>
-                            <th style="width: 250px;">NAMA FASILITAS</th>
-                            <th style="width: 200px;">ALAMAT</th>
-                            <th style="width: 150px;">NO TELEPON</th>
-                            <th style="width: 150px;">PROVINSI</th>
-                            <th style="width: 150px;">KABUPATEN</th>
+                            <th style="width: 200px;">NAMA FASILITAS</th>
+                            <th style="width: 180px;">ALAMAT</th>
+                            <th style="width: 120px;">NO TELEPON</th>
+                            <th style="width: 120px;">PROVINSI</th>
+                            <th style="width: 120px;">KABUPATEN</th>
+                            <th style="width: 150px;">WEBSITE</th>
+                            <th style="width: 200px;">DESKRIPSI</th>
                             <th style="width: 100px">AKSI</th>
                         </tr>
                     </thead>
@@ -32,10 +34,28 @@
                             <tr>
                                 <td class="text-left">{{ $loop->iteration }}</td>
                                 <td class="text-left">{{ $rs->nama_rs }}</td>
-                                <td class="text-left">{{ $rs->alamat }}</td>
+                                <td class="text-left">{{ Str::limit($rs->alamat, 50) }}</td>
                                 <td class="text-left">{{ $rs->no_telp }}</td>
                                 <td class="text-left">{{ $rs->kabupaten->provinsi->nama_provinsi ?? '-' }}</td>
                                 <td class="text-left">{{ $rs->kabupaten->nama_kabupaten ?? '-' }}</td>
+                                <td class="text-left">
+                                    @if($rs->website_url)
+                                        <a href="{{ $rs->website_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-globe"></i> Visit
+                                        </a>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+                                <td class="text-left">
+                                    @if($rs->deskripsi_tambahan)
+                                        <span data-bs-toggle="tooltip" data-bs-placement="top" title="{{ $rs->deskripsi_tambahan }}">
+                                            {{ Str::limit($rs->deskripsi_tambahan, 50) }}
+                                        </span>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
                                 <td class="text-left">
                                     <div class="d-flex gap-2">
                                         <button class="btn btn-sm btn-warning" title="Edit" data-bs-toggle="modal"
@@ -253,6 +273,15 @@
             background-color: #E1E2ED;
         }
 
+        /* Table responsive improvements */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        .table {
+            min-width: 1200px;
+        }
+
         /* Custom Modal Styles */
         .custom-modal {
             border-radius: 10px;
@@ -343,6 +372,11 @@
         .modal-backdrop {
             background-color: rgba(0, 0, 0, 0.6);
         }
+
+        /* Tooltip styling */
+        .tooltip {
+            font-size: 12px;
+        }
     </style>
 @endpush
 
@@ -350,6 +384,12 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
     $(document).ready(function() {
+        // Initialize tooltips
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
         // Fungsi untuk mengambil kabupaten
         function getKabupatensByProvinsi(provinsiId, targetSelect) {
             if (provinsiId) {

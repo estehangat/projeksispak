@@ -19,10 +19,12 @@
                     <thead>
                         <tr class="table-header">
                             <th style="width: 50px;">#</th>
-                            <th style="width: 300px;">JUDUL</th>
+                            <th style="width: 250px;">JUDUL</th>
                             <th style="width: 200px;">RINGKASAN</th>
-                            <th style="width: 150px;">PENULIS</th>
-                            <th style="width: 150px;">STATUS</th>
+                            <th style="width: 150px;">URL EKSTERNAL</th>
+                            <th style="width: 120px;">PENULIS</th>
+                            <th style="width: 150px;">SUMBER PUBLIKASI</th>
+                            <th style="width: 100px;">STATUS</th>
                             <th style="width: 100px;">TANGGAL</th>
                             <th style="width: 100px">AKSI</th>
                         </tr>
@@ -32,8 +34,18 @@
                             <tr>
                                 <td class="text-left">{{ $loop->iteration }}</td>
                                 <td class="text-left">{{ $artikel->judul }}</td>
-                                <td class="text-left">{{ \Illuminate\Support\Str::limit($artikel->ringkasan, 100) }}</td>
+                                <td class="text-left">{{ \Illuminate\Support\Str::limit($artikel->ringkasan, 80) }}</td>
+                                <td class="text-left">
+                                    @if($artikel->url_eksternal)
+                                        <a href="{{ $artikel->url_eksternal }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="bi bi-globe"></i> Visit
+                                        </a>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
                                 <td class="text-left">{{ $artikel->penulis }}</td>
+                                <td class="text-left">{{ $artikel->sumber_publikasi }}</td>
                                 <td class="text-left">
                                     <span class="badge {{ $artikel->status == 'published' ? 'bg-success' : 'bg-secondary' }}">
                                         {{ $artikel->status }}

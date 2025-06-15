@@ -107,7 +107,7 @@ class AturanIspaController extends Controller
                 ->first();
                 
             if($existingAwal){
-                 return redirect()->route('admin.aturan.index')->with('error', "Aturan awal untuk gejala '{$kodeGejalaSekarangKontekstual}' dengan jawaban '{$validated['jawaban_sekarang']}' sudah ada.");
+                 return redirect()->route('admin.aturan')->with('error', "Aturan awal untuk gejala '{$kodeGejalaSekarangKontekstual}' dengan jawaban '{$validated['jawaban_sekarang']}' sudah ada.");
             }
             
             $otherAkar = AturanIspa::where('is_pertanyaan_awal', true)
@@ -115,7 +115,7 @@ class AturanIspaController extends Controller
                 ->first();
                 
             if ($otherAkar) {
-                 return redirect()->route('admin.aturan.index')->with('error', "Sudah ada pertanyaan awal lain ({$otherAkar->id_gejala_sekarang}) yang terdaftar. Hanya boleh ada satu gejala akar.");
+                 return redirect()->route('admin.aturan')->with('error', "Sudah ada pertanyaan awal lain ({$otherAkar->id_gejala_sekarang}) yang terdaftar. Hanya boleh ada satu gejala akar.");
             }
 
         } else {
@@ -131,7 +131,7 @@ class AturanIspaController extends Controller
             ->first();
             
         if ($existingRule) {
-            return redirect()->route('admin.aturan.index')->with('error', "Aturan untuk gejala '{$kodeGejalaSekarangKontekstual}' dengan jawaban '{$validated['jawaban_sekarang']}' sudah ada.");
+            return redirect()->route('admin.aturan')->with('error', "Aturan untuk gejala '{$kodeGejalaSekarangKontekstual}' dengan jawaban '{$validated['jawaban_sekarang']}' sudah ada.");
         }
 
         $idGejalaSelanjutnyaFinalKontekstual = null;
@@ -155,7 +155,7 @@ class AturanIspaController extends Controller
             'is_pertanyaan_awal' => $isAkarPohon,
         ]);
 
-        return redirect()->route('admin.aturan.index')->with('success', 'Aturan berhasil ditambahkan.');
+        return redirect()->route('admin.aturan')->with('success', 'Aturan berhasil ditambahkan.');
     }
 
     public function edit(AturanIspa $aturan)
@@ -194,13 +194,20 @@ class AturanIspaController extends Controller
             'id_penyakit_hasil' => $idPenyakitHasilFinal,
         ]);
 
-        return redirect()->route('admin.aturan.index')->with('success', 'Aturan berhasil diperbarui.');
+        return redirect()->route('admin.aturan')->with('success', 'Aturan berhasil diperbarui.');
     }
 
-    public function destroy(AturanIspa $aturan)
+    public function destroy($id)
     {
+        $aturan = AturanIspa::findOrFail($id);
+        if ($aturan->id_gejala_selanjutnya) {
+            $adaAnak = AturanIspa::where('id_gejala_sekarang', $aturan->id_gejala_selanjutnya)->exists();
+            if ($adaAnak) {
+                return redirect()->route('pakar.aturan.index')->with('error', 'Tidak bisa menghapus aturan ini karena gejala selanjutnya dari aturan ini masih menjadi pertanyaan di aturan lain. Hapus aturan anaknya terlebih dahulu.');
+            }
+        }
         $aturan->delete();
 
-        return redirect()->route('admin.aturan.index')->with('success', 'Aturan berhasil dihapus.');
+        return redirect()->route('admin.aturan')->with('success', 'Aturan berhasil dihapus.');
     }
 }

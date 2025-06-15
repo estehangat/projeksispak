@@ -20,7 +20,9 @@
                         <tr class="table-header">
                             <th style="width: 50px;">#</th>
                             <th style="width: 100px;">KODE PENYAKIT</th>
-                            <th style="width: 300px;">PENYAKIT</th>
+                            <th style="width: 200px;">PENYAKIT</th>
+                            <th style="width: 300px;">DESKRIPSI</th>
+                            <th style="width: 300px;">SOLUSI</th>
                             <th style="width: 100px">AKSI</th>
                         </tr>
                     </thead>
@@ -30,6 +32,8 @@
                                 <td class="text-left">{{ $loop->iteration }}</td>
                                 <td class="text-left">{{ $penyakit->kode_penyakit }}</td>
                                 <td class="text-left">{{ $penyakit->penyakit }}</td>
+                                <td class="text-left">{{ Str::limit($penyakit->deskripsi, 100) }}</td>
+                                <td class="text-left">{{ Str::limit($penyakit->solusi, 100) }}</td>
                                 <td class="text-left">
                                     <div class="d-flex gap-2">
                                         <button class="btn btn-sm btn-warning" title="Edit" data-bs-toggle="modal"
@@ -52,7 +56,7 @@
 
     <!-- Add Penyakit Modal -->
     <div class="modal fade" id="addPenyakitModal" tabindex="-1" aria-labelledby="addPenyakitModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content custom-modal">
                 <div class="modal-header custom-modal-header">
                     <h5 class="modal-title fw-bold" id="addPenyakitModalLabel">Tambah Penyakit</h5>
@@ -62,12 +66,24 @@
                     <div class="modal-body custom-modal-body">
                         <div class="row g-3">
                             <div class="col-md-6">
+                                <label for="kode_penyakit" class="form-label">Kode Penyakit</label>
                                 <input type="text" class="form-control custom-input" id="kode_penyakit"
                                     name="kode_penyakit" placeholder="Kode Penyakit" required>
                             </div>
                             <div class="col-md-6">
+                                <label for="penyakit" class="form-label">Nama Penyakit</label>
                                 <input type="text" class="form-control custom-input" id="penyakit" name="penyakit"
-                                    placeholder="Penyakit" required>
+                                    placeholder="Nama Penyakit" required>
+                            </div>
+                            <div class="col-12">
+                                <label for="deskripsi" class="form-label">Deskripsi</label>
+                                <textarea class="form-control custom-input" id="deskripsi" name="deskripsi" rows="4"
+                                    placeholder="Deskripsi penyakit..."></textarea>
+                            </div>
+                            <div class="col-12">
+                                <label for="solusi" class="form-label">Solusi</label>
+                                <textarea class="form-control custom-input" id="solusi" name="solusi" rows="4"
+                                    placeholder="Solusi atau pengobatan..."></textarea>
                             </div>
                         </div>
                     </div>
@@ -86,7 +102,7 @@
         <!-- Edit Penyakit Modal -->
         <div class="modal fade" id="editPenyakitModal{{ $penyakit->id }}" tabindex="-1"
             aria-labelledby="editPenyakitModalLabel{{ $penyakit->id }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
                 <div class="modal-content custom-modal">
                     <div class="modal-header custom-modal-header">
                         <h5 class="modal-title fw-bold" id="editPenyakitModalLabel{{ $penyakit->id }}">Edit Penyakit</h5>
@@ -97,14 +113,26 @@
                         <div class="modal-body custom-modal-body">
                             <div class="row g-3">
                                 <div class="col-md-6">
+                                    <label for="edit_kode_penyakit{{ $penyakit->id }}" class="form-label">Kode Penyakit</label>
                                     <input type="text" class="form-control custom-input"
                                         id="edit_kode_penyakit{{ $penyakit->id }}" name="kode_penyakit"
                                         value="{{ $penyakit->kode_penyakit }}" placeholder="Kode Penyakit" required>
                                 </div>
                                 <div class="col-md-6">
+                                    <label for="edit_penyakit{{ $penyakit->id }}" class="form-label">Nama Penyakit</label>
                                     <input type="text" class="form-control custom-input"
                                         id="edit_penyakit{{ $penyakit->id }}" name="penyakit"
-                                        value="{{ $penyakit->penyakit }}" placeholder="Penyakit" required>
+                                        value="{{ $penyakit->penyakit }}" placeholder="Nama Penyakit" required>
+                                </div>
+                                <div class="col-12">
+                                    <label for="edit_deskripsi{{ $penyakit->id }}" class="form-label">Deskripsi</label>
+                                    <textarea class="form-control custom-input" id="edit_deskripsi{{ $penyakit->id }}" 
+                                        name="deskripsi" rows="4" placeholder="Deskripsi penyakit...">{{ $penyakit->deskripsi }}</textarea>
+                                </div>
+                                <div class="col-12">
+                                    <label for="edit_solusi{{ $penyakit->id }}" class="form-label">Solusi</label>
+                                    <textarea class="form-control custom-input" id="edit_solusi{{ $penyakit->id }}" 
+                                        name="solusi" rows="4" placeholder="Solusi atau pengobatan...">{{ $penyakit->solusi }}</textarea>
                                 </div>
                             </div>
                         </div>
@@ -251,6 +279,17 @@
         /* Modal backdrop */
         .modal-backdrop {
             background-color: rgba(0, 0, 0, 0.6);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        textarea.custom-input {
+            resize: vertical;
+            min-height: 100px;
         }
     </style>
 @endpush

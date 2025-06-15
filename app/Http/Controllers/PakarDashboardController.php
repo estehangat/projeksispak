@@ -14,11 +14,11 @@ class PakarDashboardController extends Controller
 {
     public function index()
     {
-        $gejalaDasarTampil = Gejala::whereNotLike('kode_gejala', '%\\_%')
+        $gejalas = Gejala::whereNotLike('kode_gejala', '%\\_%')
             ->orderBy('kode_gejala', 'asc')
             ->get();
         
-        $gejalaCount = $gejalaDasarTampil->count();
+        $gejalaCount = $gejalas->count();
 
         $penyakits = Penyakit::orderBy('kode_penyakit')->get();
         $penyakitCount = $penyakits->count();
@@ -26,7 +26,7 @@ class PakarDashboardController extends Controller
         $aturanCount = AturanIspa::count();
 
         return view('pakar.index', compact(
-            'gejalaDasarTampil',
+            'gejalas',
             'gejalaCount',
             'penyakits',
             'penyakitCount',
@@ -104,7 +104,7 @@ class PakarDashboardController extends Controller
 
     public function penyakitIndex()
     {
-        $penyakits = Penyakit::orderBy('kode_penyakit')->get();
+        $penyakits = Penyakit::all();
         $penyakitCount = $penyakits->count();
         return view('pakar.penyakit.index', compact('penyakits', 'penyakitCount'));
     }
@@ -112,48 +112,55 @@ class PakarDashboardController extends Controller
     public function penyakitStore(Request $request)
     {
         $request->validate([
-            'kode_penyakit' => ['required', 'string', 'max:10', Rule::unique('penyakit', 'kode_penyakit')],
+            'kode_penyakit' => 'required|string|max:10|unique:penyakit',
             'penyakit' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'solusi' => 'nullable|string',
         ]);
+
+        // Assuming Penyakit is a model that handles the diseases table
         Penyakit::create($request->all());
-        return redirect()->route('pakar.penyakit.index')->with('success', 'Penyakit berhasil ditambahkan.');
+        return redirect()->route('pakar.penyakit')->with('success', 'Penyakit berhasil ditambahkan.');
     }
 
-    public function penyakitEdit(Penyakit $penyakit)
+    public function penyakitEdit($id)
     {
+        $penyakit = Penyakit::findOrFail($id);
         return view('pakar.penyakit.edit', compact('penyakit'));
     }
 
-    public function penyakitUpdate(Request $request, Penyakit $penyakit)
+    public function penyakitUpdate(Request $request, $id)
     {
         $request->validate([
-            'kode_penyakit' => ['required', 'string', 'max:10', Rule::unique('penyakit', 'kode_penyakit')->ignore($penyakit->id)],
+            'kode_penyakit' => 'required|string|max:10|unique:penyakit,kode_penyakit,' . $id,
             'penyakit' => 'required|string|max:255',
             'deskripsi' => 'nullable|string',
             'solusi' => 'nullable|string',
         ]);
+
+        $penyakit = Penyakit::findOrFail($id);
         $penyakit->update($request->all());
-        return redirect()->route('pakar.penyakit.index')->with('success', 'Penyakit berhasil diperbarui.');
+        return redirect()->route('pakar.penyakit')->with('success', 'Penyakit berhasil diperbarui.');
     }
 
-    public function penyakitDestroy(Penyakit $penyakit)
+    public function penyakitDestroy($id)
     {
+        $penyakit = Penyakit::findOrFail($id);
+        
         if (AturanIspa::where('id_penyakit_hasil', $penyakit->kode_penyakit)->exists()) {
-             return redirect()->route('pakar.penyakit.index')->with('error', 'Penyakit tidak bisa dihapus karena masih digunakan sebagai hasil diagnosa dalam aturan.');
+            return redirect()->route('pakar.penyakit')->with('error', 'Penyakit tidak bisa dihapus karena masih digunakan sebagai hasil diagnosa dalam aturan.');
         }
+        
         $penyakit->delete();
-        return redirect()->route('pakar.penyakit.index')->with('success', 'Penyakit berhasil dihapus.');
+        return redirect()->route('pakar.penyakit')->with('success', 'Penyakit berhasil dihapus.');
     }
 
     public function aturanIndex()
     {
         $aturans = AturanIspa::with(['gejalaSekarangRel', 'gejalaSelanjutnyaRel', 'penyakitHasilRel'])
-            ->orderBy('is_pertanyaan_awal', 'desc')
             ->orderBy('id_gejala_sekarang')
             ->orderBy('jawaban')
-            ->paginate(15);
+            ->get();
 
         $gejalaDasar = Gejala::whereNotLike('kode_gejala', '%\\_%')
             ->orderBy('kode_gejala')
@@ -164,19 +171,25 @@ class PakarDashboardController extends Controller
             ->distinct()
             ->pluck('id_gejala_sekarang');
 
-        $calonIndukDariDasar = Gejala::whereNotLike('kode_gejala', '%\\_%')
-            ->whereNotIn('kode_gejala', $kodeGejalaIndukPotensial)
-            ->pluck('kode_gejala');
-        
-        $semuaKodeIndukPotensial = $kodeGejalaIndukPotensial->merge($calonIndukDariDasar)->unique();
-
-        $gejalaIndukPotensial = Gejala::whereIn('kode_gejala', $semuaKodeIndukPotensial)
+        $gejalaIndukPotensial = Gejala::whereIn('kode_gejala', $kodeGejalaIndukPotensial)
             ->orderBy('kode_gejala')
             ->get();
+        
+        $calonIndukTambahan = Gejala::whereNotLike('kode_gejala', '%\\_%')
+            ->whereNotIn('kode_gejala', $gejalaIndukPotensial->pluck('kode_gejala'))
+            ->orderBy('kode_gejala')
+            ->get();
+            
+        $gejalaIndukPotensial = $gejalaIndukPotensial->merge($calonIndukTambahan)->sortBy('kode_gejala')->unique('kode_gejala');
 
         $penyakits = Penyakit::orderBy('kode_penyakit')->get();
 
-        return view('pakar.aturan.index', compact('aturans', 'gejalaDasar', 'gejalaIndukPotensial', 'penyakits'));
+        return view('pakar.aturan.index', compact(
+            'aturans',
+            'gejalaDasar',
+            'gejalaIndukPotensial',
+            'penyakits'
+        ));
     }
 
     private function getOrCreateKontekstualGejala(string $kodeGejalaDasar, ?string $kodeIndukKontekstual, ?string $jawabanIndukUntukAnak): string

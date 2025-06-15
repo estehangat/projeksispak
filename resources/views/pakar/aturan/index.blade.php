@@ -1,4 +1,4 @@
-@extends('layouts.admin')
+@extends('layouts.pakar')
 
 @section('title', 'Data Aturan ISPA')
 @section('page-title', 'Kelola Aturan Pohon Keputusan')

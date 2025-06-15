@@ -27,6 +27,8 @@ class PenyakitController extends Controller
         $request->validate([
             'kode_penyakit' => 'required|string|max:10|unique:penyakit',
             'penyakit' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+            'solusi' => 'nullable|string',
         ]);
 
         // Assuming Penyakit is a model that handles the diseases table
@@ -48,6 +50,8 @@ class PenyakitController extends Controller
         $request->validate([
             'kode_penyakit' => 'required|string|max:10|unique:penyakit,kode_penyakit,' . $id,
             'penyakit' => 'required|string|max:255',
+            'deskripsi' => 'nullable|string',
+            'solusi' => 'nullable|string',
         ]);
 
         $penyakit = Penyakit::findOrFail($id);
