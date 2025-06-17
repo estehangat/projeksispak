@@ -240,7 +240,6 @@
                                 <i class="fas fa-sign-out-alt me-1"></i> Logout dari Akun
                             </a>
                         </form>
-                        <p class="text-muted small mt-3">Jika Anda ingin mengubah data profil atau password, fitur tersebut akan segera tersedia.</p>
                     </div>
 
                 </div>
